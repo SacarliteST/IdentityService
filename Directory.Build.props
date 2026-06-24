@@ -1,0 +1,24 @@
+<Project>
+  <PropertyGroup>
+    <CommonPrefix>IdentityService</CommonPrefix>
+    <AssemblyName>$(CommonPrefix).$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(CommonPrefix).$(MSBuildProjectName)</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsTestProject)' != 'true'">
+    <InternalsVisibleTo Include="$(CommonPrefix).IntegrationTests" />
+    <InternalsVisibleTo Include="$(CommonPrefix).UnitTests" />
+  </ItemGroup>
+</Project>
