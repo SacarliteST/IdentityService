@@ -23,7 +23,9 @@ internal static class OpenApiExtensions
             {
                 var xml = Path.Combine(AppContext.BaseDirectory, $"{assembly.GetName().Name}.xml");
                 if (File.Exists(xml))
+                {
                     c.IncludeXmlComments(xml);
+                }
             }
         });
 }

@@ -10,7 +10,9 @@ public sealed class ErrorDelegatingHandler : DelegatingHandler
         var response = await base.SendAsync(request, cancellationToken);
 
         if (response.IsSuccessStatusCode)
+        {
             return response;
+        }
 
         ApiProblem? problem = null;
         try

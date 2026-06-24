@@ -6,7 +6,7 @@ namespace IdentityService.IntegrationTests.Smoke;
 
 public sealed class HealthSmokeTest(TestApplication testApplication) : ApiTestBase(testApplication)
 {
-    [Fact]
+    [DockerFact]
     public async Task Get_Health_Returns200()
     {
         var response = await HttpClient.GetAsync("/health");

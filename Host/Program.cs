@@ -1,3 +1,9 @@
+using IdentityService.Data;
+using IdentityService.Data.Migrations;
+using IdentityService.Data.Seeding;
+using IdentityService.Domain;
+using Microsoft.AspNetCore.Identity;
+
 namespace IdentityService.Host;
 
 internal sealed class Program
@@ -15,6 +21,16 @@ internal sealed class Program
 
             var app = builder.Build();
             Startup.ConfigureApp(app);
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var sp = scope.ServiceProvider;
+                await sp.GetRequiredService<IMigrationManager>().MigrateAsync();
+                await RoleSeeder.SeedRolesAsync(sp.GetRequiredService<RoleManager<ApplicationRole>>());
+                await AdminSeeder.SeedAdminAsync(
+                    sp.GetRequiredService<UserManager<ApplicationUser>>(),
+                    builder.Configuration);
+            }
 
             await app.RunAsync();
         }

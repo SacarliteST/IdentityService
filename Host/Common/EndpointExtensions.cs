@@ -9,7 +9,9 @@ public static class EndpointExtensions
             .Where(t => t is { IsClass: true, IsAbstract: false } && t.IsAssignableTo(typeof(IEndpoint)));
 
         foreach (var type in endpointTypes)
+        {
             services.AddTransient(typeof(IEndpoint), type);
+        }
 
         return services;
     }
@@ -20,7 +22,9 @@ public static class EndpointExtensions
         var endpoints = scope.ServiceProvider.GetRequiredService<IEnumerable<IEndpoint>>();
 
         foreach (var endpoint in endpoints)
+        {
             endpoint.MapEndpoints(app);
+        }
 
         return app;
     }

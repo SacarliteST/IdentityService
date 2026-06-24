@@ -1,5 +1,7 @@
 using FluentValidation;
+using IdentityService.Data;
 using IdentityService.Host.Common;
+using IdentityService.Host.Common.SigningKeys;
 
 namespace IdentityService.Host;
 
@@ -12,6 +14,8 @@ internal static class Startup
         services.AddEndpointsApiExplorer();
         services.AddOpenApiDocumentation();
 
+        services.AddData(builder.Configuration);
+        services.AddSigningKeys(builder.Configuration);
         services.AddCqrs();
         services.AddFeatures();
         services.AddValidatorsFromAssemblyContaining<IHostMarker>(includeInternalTypes: true);
