@@ -1,12 +1,21 @@
-using IdentityService.Contracts;
+﻿using IdentityService.Contracts;
 using IdentityService.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
 namespace IdentityService.Data.Seeding;
 
+/// <summary>
+/// Создаёт первоначального администратора из конфигурации секции <c>InitialAdmin</c>.
+/// Если секция пуста или пользователь уже существует — ничего не делает.
+/// Вызывается из <c>Program.cs</c> после применения миграций.
+/// </summary>
 public static class AdminSeeder
 {
+    /// <summary>
+    /// Создаёт admin-пользователя и назначает роль <c>Admin</c>.
+    /// Безопасно вызывать повторно: при наличии пользователя возвращает управление без изменений.
+    /// </summary>
     public static async Task SeedAdminAsync(
         UserManager<ApplicationUser> userManager,
         IConfiguration configuration)
@@ -14,7 +23,7 @@ public static class AdminSeeder
         var email = configuration["InitialAdmin:Email"];
         var password = configuration["InitialAdmin:Password"];
 
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        if (String.IsNullOrWhiteSpace(email) || String.IsNullOrWhiteSpace(password))
         {
             return;
         }

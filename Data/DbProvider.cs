@@ -1,4 +1,4 @@
-namespace IdentityService.Data;
+﻿namespace IdentityService.Data;
 
 public enum DbProvider
 {

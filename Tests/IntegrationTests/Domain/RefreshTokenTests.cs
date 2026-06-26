@@ -1,4 +1,4 @@
-using IdentityService.Domain;
+﻿using IdentityService.Domain;
 using Shouldly;
 
 namespace IdentityService.IntegrationTests.Domain;

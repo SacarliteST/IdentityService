@@ -1,4 +1,4 @@
-namespace IdentityService.Client;
+﻿namespace IdentityService.Client;
 
 public class ApiException(int statusCode, ApiProblem? problem)
     : Exception(problem?.Detail ?? problem?.Title ?? "API error")

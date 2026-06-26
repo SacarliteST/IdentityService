@@ -1,4 +1,4 @@
-namespace IdentityService.Host.Common;
+﻿namespace IdentityService.Web.Common;
 
 internal static class FeaturesExtensions
 {

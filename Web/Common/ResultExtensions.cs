@@ -1,7 +1,12 @@
-using IdentityService.Common.Results;
+﻿using IdentityService.Common.Results;
 
-namespace IdentityService.Host.Common;
+namespace IdentityService.Web.Common;
 
+/// <summary>
+/// Расширения для конвертации <see cref="Result"/> / <see cref="Result{T}"/> в HTTP-ответы минимального API.
+/// Маппинг <see cref="ErrorType"/> → HTTP-статус:
+/// Validation → 422, Unauthorized → 401, NotFound → 404, Conflict → 409, Failure → 500.
+/// </summary>
 public static class ResultExtensions
 {
     public static IResult ToOk(this Result result) =>

@@ -1,7 +1,6 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
-using IdentityService.Host.Common.Options;
-using IdentityService.Host.Common.SigningKeys;
+using IdentityService.Web.Common.Keys;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Shouldly;

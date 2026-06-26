@@ -1,4 +1,4 @@
-namespace IdentityService.Data;
+﻿namespace IdentityService.Data;
 
 public sealed class ConnectionOptions
 {

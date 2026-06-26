@@ -1,8 +1,4 @@
-using IdentityService.Data;
-using IdentityService.Data.Migrations;
-using IdentityService.Data.Seeding;
-using IdentityService.Domain;
-using Microsoft.AspNetCore.Identity;
+﻿using IdentityService.Web;
 
 namespace IdentityService.Host;
 
@@ -22,16 +18,7 @@ internal sealed class Program
             var app = builder.Build();
             Startup.ConfigureApp(app);
 
-            using (var scope = app.Services.CreateScope())
-            {
-                var sp = scope.ServiceProvider;
-                await sp.GetRequiredService<IMigrationManager>().MigrateAsync();
-                await RoleSeeder.SeedRolesAsync(sp.GetRequiredService<RoleManager<ApplicationRole>>());
-                await AdminSeeder.SeedAdminAsync(
-                    sp.GetRequiredService<UserManager<ApplicationUser>>(),
-                    builder.Configuration);
-            }
-
+            await app.InitializeWebAsync();
             await app.RunAsync();
         }
         catch (Exception exception)

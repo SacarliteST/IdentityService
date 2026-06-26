@@ -1,4 +1,4 @@
-using IdentityService.Data.Migrations;
+﻿using IdentityService.Data.Migrations;
 using IdentityService.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

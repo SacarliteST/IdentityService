@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using IdentityService.IntegrationTests.Infrastructure;
 using Shouldly;
 

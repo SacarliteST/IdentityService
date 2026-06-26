@@ -1,6 +1,6 @@
-using IdentityService.Host.Common;
+﻿using IdentityService.Web.Common;
 
-namespace IdentityService.Host.Features.Health;
+namespace IdentityService.Web.Features.Health;
 
 internal sealed class HealthEndpoint : IEndpoint
 {

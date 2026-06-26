@@ -1,7 +1,14 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace IdentityService.Common.Cqrs;
 
+/// <summary>
+/// Реализация <see cref="ISender"/>. Строит пайплайн из зарегистрированных
+/// <see cref="IPipelineBehavior{TRequest,TResponse}"/> и передаёт управление обработчику.
+/// <br/>
+/// Порядок: behaviours регистрируются слева направо, разворачиваются через <c>Reverse()</c>,
+/// поэтому первый зарегистрированный behaviour выполняется первым (как middleware в ASP.NET Core).
+/// </summary>
 public sealed class Sender(IServiceProvider sp) : ISender
 {
     public Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken ct = default)

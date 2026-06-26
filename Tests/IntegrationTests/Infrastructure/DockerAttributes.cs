@@ -1,4 +1,4 @@
-using DotNet.Testcontainers.Builders;
+﻿using DotNet.Testcontainers.Builders;
 using Testcontainers.PostgreSql;
 
 namespace IdentityService.IntegrationTests.Infrastructure;

@@ -1,4 +1,4 @@
-namespace IdentityService.Host.Common.Options;
+﻿namespace IdentityService.Web.Common.Keys;
 
 public sealed class SigningKeyOptions
 {

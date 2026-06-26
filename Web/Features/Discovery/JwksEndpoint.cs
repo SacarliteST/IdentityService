@@ -1,7 +1,7 @@
-using IdentityService.Host.Common;
-using IdentityService.Host.Common.SigningKeys;
+﻿using IdentityService.Web.Common;
+using IdentityService.Web.Common.Keys;
 
-namespace IdentityService.Host.Features.Discovery;
+namespace IdentityService.Web.Features.Discovery;
 
 internal sealed class JwksEndpoint(ISigningKeyProvider signingKeyProvider) : IEndpoint
 {

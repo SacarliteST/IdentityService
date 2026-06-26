@@ -1,4 +1,4 @@
-namespace IdentityService.Contracts;
+﻿namespace IdentityService.Contracts;
 
 // TODO: заполнить в промте D
 public static class ClaimNames

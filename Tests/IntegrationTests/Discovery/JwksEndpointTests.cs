@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 using IdentityService.IntegrationTests.Infrastructure;
 using Shouldly;
@@ -50,7 +50,7 @@ public sealed class JwksEndpointTests(TestApplication testApplication) : ApiTest
         doc.RootElement.TryGetProperty("issuer", out _).ShouldBeTrue();
 
         doc.RootElement.TryGetProperty("jwks_uri", out var jwksUri).ShouldBeTrue();
-        (jwksUri.GetString() ?? string.Empty).ShouldContain("/.well-known/jwks.json");
+        (jwksUri.GetString() ?? String.Empty).ShouldContain("/.well-known/jwks.json");
 
         doc.RootElement.TryGetProperty("id_token_signing_alg_values_supported", out var algs).ShouldBeTrue();
         algs.EnumerateArray().Select(a => a.GetString()).ShouldContain("RS256");

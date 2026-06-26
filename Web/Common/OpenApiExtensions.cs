@@ -1,8 +1,8 @@
-using IdentityService.Contracts;
+﻿using IdentityService.Contracts;
 using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace IdentityService.Host.Common;
+namespace IdentityService.Web.Common;
 
 internal static class OpenApiExtensions
 {
@@ -19,7 +19,7 @@ internal static class OpenApiExtensions
             c.SupportNonNullableReferenceTypes();
             c.UseAllOfToExtendReferenceSchemas();
 
-            foreach (var assembly in new[] { typeof(IHostMarker).Assembly, typeof(ApiRoutes).Assembly })
+            foreach (var assembly in new[] { typeof(IWebMarker).Assembly, typeof(ApiRoutes).Assembly })
             {
                 var xml = Path.Combine(AppContext.BaseDirectory, $"{assembly.GetName().Name}.xml");
                 if (File.Exists(xml))

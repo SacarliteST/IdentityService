@@ -1,4 +1,4 @@
-using IdentityService.Data.Migrations;
+﻿using IdentityService.Data.Migrations;
 using IdentityService.Data.Seeding;
 using IdentityService.Domain;
 using IdentityService.Host;

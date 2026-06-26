@@ -1,6 +1,6 @@
-using IdentityService.Host.Common.Options;
+﻿using IdentityService.Web.Common.Tokens;
 
-namespace IdentityService.Host.Common.SigningKeys;
+namespace IdentityService.Web.Common.Keys;
 
 internal static class SigningKeyExtensions
 {

@@ -1,4 +1,4 @@
-namespace IdentityService.Contracts;
+﻿namespace IdentityService.Contracts;
 
 public static class ApiRoutes
 {

@@ -1,26 +1,37 @@
-using System.Security.Cryptography;
-using IdentityService.Host.Common.Options;
+﻿using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace IdentityService.Host.Common.SigningKeys;
+namespace IdentityService.Web.Common.Keys;
 
+/// <summary>
+/// Синглтон-реализация <see cref="ISigningKeyProvider"/> на базе RSA.
+/// Источник ключа выбирается по приоритету при старте:
+/// <list type="number">
+///   <item><see cref="SigningKeyOptions.PrivateKeyPem"/> — PEM из конфига/секрета.</item>
+///   <item><see cref="SigningKeyOptions.KeyFilePath"/> существует → загружает из файла.</item>
+///   <item>Генерирует RSA-2048 и, если задан путь, сохраняет PEM на диск для переживания рестартов.</item>
+/// </list>
+/// <see cref="Kid"/> вычисляется как base64url(SHA-256(n ‖ e)), что делает его стабильным
+/// для одного и того же ключа вне зависимости от источника.
+/// </summary>
 internal sealed class RsaSigningKeyProvider : ISigningKeyProvider, IDisposable
 {
     private readonly RSA rsa;
 
+    /// <inheritdoc/>
     public string Kid { get; }
 
     public RsaSigningKeyProvider(IOptions<SigningKeyOptions> options)
     {
         var opts = options.Value;
 
-        if (!string.IsNullOrEmpty(opts.PrivateKeyPem))
+        if (!String.IsNullOrEmpty(opts.PrivateKeyPem))
         {
             rsa = RSA.Create();
             rsa.ImportFromPem(opts.PrivateKeyPem.AsSpan());
         }
-        else if (!string.IsNullOrEmpty(opts.KeyFilePath) && File.Exists(opts.KeyFilePath))
+        else if (!String.IsNullOrEmpty(opts.KeyFilePath) && File.Exists(opts.KeyFilePath))
         {
             rsa = RSA.Create();
             rsa.ImportFromPem(File.ReadAllText(opts.KeyFilePath).AsSpan());
@@ -28,16 +39,17 @@ internal sealed class RsaSigningKeyProvider : ISigningKeyProvider, IDisposable
         else
         {
             rsa = RSA.Create(2048);
-            if (!string.IsNullOrEmpty(opts.KeyFilePath))
+            if (!String.IsNullOrEmpty(opts.KeyFilePath))
             {
                 // Persist so tokens survive restarts — TODO: use secret manager / DB for multi-instance prod
                 File.WriteAllText(opts.KeyFilePath, rsa.ExportRSAPrivateKeyPem());
             }
         }
 
-        Kid = string.IsNullOrEmpty(opts.Kid) ? ComputeKid(rsa) : opts.Kid;
+        Kid = String.IsNullOrEmpty(opts.Kid) ? ComputeKid(rsa) : opts.Kid;
     }
 
+    /// <inheritdoc/>
     public SigningCredentials GetSigningCredentials()
     {
         return new SigningCredentials(
@@ -45,6 +57,7 @@ internal sealed class RsaSigningKeyProvider : ISigningKeyProvider, IDisposable
             SecurityAlgorithms.RsaSha256);
     }
 
+    /// <inheritdoc/>
     public JsonWebKey GetPublicJwk()
     {
         var publicParams = rsa.ExportParameters(includePrivateParameters: false);

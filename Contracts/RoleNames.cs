@@ -1,4 +1,4 @@
-namespace IdentityService.Contracts;
+﻿namespace IdentityService.Contracts;
 
 // TODO: используется для сидинга ролей и назначения — заполнить в промте A
 public static class RoleNames

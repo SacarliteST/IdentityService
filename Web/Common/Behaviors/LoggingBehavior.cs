@@ -1,9 +1,14 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using IdentityService.Common.Cqrs;
 using IdentityService.Common.Results;
 
-namespace IdentityService.Host.Common.Behaviors;
+namespace IdentityService.Web.Common.Behaviors;
 
+/// <summary>
+/// Пайплайн-поведение: логирует имя запроса, время выполнения и флаг успеха.
+/// При необработанном исключении пишет <c>LogError</c> и пробрасывает исключение дальше.
+/// Регистрируется автоматически в <see cref="CqrsExtensions.AddCqrs"/>.
+/// </summary>
 internal sealed class LoggingBehavior<TRequest, TResponse>(
     ILogger<LoggingBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>

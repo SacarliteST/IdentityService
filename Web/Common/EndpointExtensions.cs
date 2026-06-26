@@ -1,4 +1,4 @@
-namespace IdentityService.Host.Common;
+﻿namespace IdentityService.Web.Common;
 
 public static class EndpointExtensions
 {

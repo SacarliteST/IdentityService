@@ -1,4 +1,4 @@
-namespace IdentityService.Client;
+﻿namespace IdentityService.Client;
 
 public sealed class IdentityClientOptions
 {

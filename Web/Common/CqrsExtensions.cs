@@ -1,7 +1,7 @@
-using IdentityService.Common.Cqrs;
-using IdentityService.Host.Common.Behaviors;
+﻿using IdentityService.Common.Cqrs;
+using IdentityService.Web.Common.Behaviors;
 
-namespace IdentityService.Host.Common;
+namespace IdentityService.Web.Common;
 
 internal static class CqrsExtensions
 {

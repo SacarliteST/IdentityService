@@ -1,6 +1,6 @@
-using FluentValidation;
+﻿using FluentValidation;
 
-namespace IdentityService.Host.Common;
+namespace IdentityService.Web.Common;
 
 internal sealed class ValidationFilter<TRequest>(IServiceProvider sp) : IEndpointFilter
     where TRequest : class

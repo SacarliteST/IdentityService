@@ -1,4 +1,4 @@
-using IdentityService.Contracts;
+﻿using IdentityService.Contracts;
 using IdentityService.Domain;
 using IdentityService.IntegrationTests.Infrastructure;
 using Microsoft.AspNetCore.Identity;

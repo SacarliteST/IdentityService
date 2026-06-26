@@ -1,8 +1,8 @@
-using IdentityService.Host.Common;
-using IdentityService.Host.Common.Options;
+﻿using IdentityService.Web.Common;
+using IdentityService.Web.Common.Tokens;
 using Microsoft.Extensions.Options;
 
-namespace IdentityService.Host.Features.Discovery;
+namespace IdentityService.Web.Features.Discovery;
 
 internal sealed class OpenIdConfigurationEndpoint(IOptions<JwtOptions> jwtOptions) : IEndpoint
 {

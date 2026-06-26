@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace IdentityService.Host.Common;
+namespace IdentityService.Web.Common;
 
 internal static class ExceptionHandlerExtensions
 {
@@ -20,7 +20,9 @@ internal static class ExceptionHandlerExtensions
                     _ => StatusCodes.Status500InternalServerError
                 };
 
-                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                var logger = context.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("IdentityService.Web.ExceptionHandler");
                 logger.LogError(exception, "Unhandled exception on {Method} {Path}",
                     context.Request.Method, context.Request.Path);
 
