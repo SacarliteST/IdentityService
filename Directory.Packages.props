@@ -51,6 +51,7 @@
     <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.4" />
 
     <!-- JWT / Identity Model -->
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.12.1" />
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.12.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
 

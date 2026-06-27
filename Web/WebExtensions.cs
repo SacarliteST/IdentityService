@@ -5,7 +5,10 @@ using IdentityService.Data.Seeding;
 using IdentityService.Domain;
 using IdentityService.Web.Common;
 using IdentityService.Web.Common.Keys;
+using IdentityService.Web.Common.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace IdentityService.Web;
 
@@ -14,7 +17,7 @@ namespace IdentityService.Web;
 /// </summary>
 public static class WebExtensions
 {
-    /// <summary>Регистрирует все сервисы Web-слоя (данные, CQRS, эндпоинты, ключи, OpenAPI).</summary>
+    /// <summary>Регистрирует все сервисы Web-слоя (данные, CQRS, эндпоинты, ключи, токены, OpenAPI).</summary>
     public static IServiceCollection AddWeb(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -25,12 +28,15 @@ public static class WebExtensions
 
         services.AddData(configuration);
         services.AddSigningKeys(configuration);
+        services.AddTokens();
         services.AddCqrs();
         services.AddFeatures();
         services.AddValidatorsFromAssemblyContaining<IWebMarker>(includeInternalTypes: true);
         services.AddEndpoints();
 
-        services.AddAuthentication();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer();
+        services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerPostConfigure>();
         services.AddAuthorization();
 
         return services;

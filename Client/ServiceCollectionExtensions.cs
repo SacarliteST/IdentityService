@@ -13,7 +13,12 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient<ErrorDelegatingHandler>();
 
-        // Типизированные клиенты — в промте D
+        services.AddHttpClient<IIdentityClient, IdentityClient>((sp, client) =>
+            {
+                var opts = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<IdentityClientOptions>>().Value;
+                client.BaseAddress = opts.BaseAddress;
+            })
+            .AddHttpMessageHandler<ErrorDelegatingHandler>();
 
         return services;
     }

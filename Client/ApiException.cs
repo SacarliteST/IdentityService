@@ -10,6 +10,9 @@ public class ApiException(int statusCode, ApiProblem? problem)
 public sealed class UnauthorizedException(ApiProblem? problem)
     : ApiException(401, problem);
 
+public sealed class ForbiddenException(ApiProblem? problem)
+    : ApiException(403, problem);
+
 public sealed class ConflictException(ApiProblem? problem)
     : ApiException(409, problem);
 

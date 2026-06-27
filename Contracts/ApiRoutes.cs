@@ -4,8 +4,17 @@ public static class ApiRoutes
 {
     public const string PrefixV1 = "api/v1";
 
-    // TODO: Auth/Users routes — в промте D
-    public static class Auth { }
+    public static class Auth
+    {
+        public const string Register = $"{PrefixV1}/auth/register";
+        public const string Login = $"{PrefixV1}/auth/login";
+        public const string Refresh = $"{PrefixV1}/auth/refresh";
+        public const string Logout = $"{PrefixV1}/auth/logout";
+    }
 
-    public static class Users { }
+    public static class Users
+    {
+        /// <summary>Route template — {id} заменяется на Guid пользователя.</summary>
+        public const string Roles = $"{PrefixV1}/users/{{id}}/roles";
+    }
 }

@@ -16,6 +16,8 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
     private const string TestDbName = "identity_test";
     private const string TestUser = "identity_test_user";
     private const string TestPassword = "identity_test_password";
+    internal const string TestIssuer = "https://identity.test";
+    internal const string TestAudience = "identity.api";
 
     // Инициализируются в InitializeAsync, чтобы конструктор не обращался к Docker.
     private PostgreSqlContainer? postgres = null;
@@ -38,7 +40,7 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
         await postgres.StartAsync();
         connectionString = postgres.GetConnectionString();
 
-        // Services тригерит ConfigureWebHost — вызываем после установки _connectionString.
+        // Services тригерит ConfigureWebHost — вызываем после установки connectionString.
         using var scope = Services.CreateScope();
         var sp = scope.ServiceProvider;
         await sp.GetRequiredService<IMigrationManager>().MigrateAsync();
@@ -47,14 +49,19 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        var overrides = new Dictionary<string, string?>
+        {
+            { "Jwt:Issuer", TestIssuer },
+            { "Jwt:Audience", TestAudience }
+        };
+
         if (connectionString is not null)
         {
-            builder.ConfigureAppConfiguration(config =>
-                config.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    { "ConnectionStrings:ConnectionString", connectionString }
-                }));
+            overrides["ConnectionStrings:ConnectionString"] = connectionString;
         }
+
+        builder.ConfigureAppConfiguration(config =>
+            config.AddInMemoryCollection(overrides));
 
         base.ConfigureWebHost(builder);
     }

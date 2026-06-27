@@ -20,14 +20,12 @@ public sealed class ErrorDelegatingHandler : DelegatingHandler
             problem = await response.Content.ReadFromJsonAsync<ApiProblem>(
                 ClientJson.Default, cancellationToken);
         }
-        catch
-        {
-            // ignore deserialization failures — we'll still throw the appropriate exception
-        }
+        catch { /* ignore deserialization failures */ }
 
         throw (int)response.StatusCode switch
         {
             401 => new UnauthorizedException(problem),
+            403 => new ForbiddenException(problem),
             409 => new ConflictException(problem),
             422 => new ValidationException(problem),
             _ => new ApiException((int)response.StatusCode, problem)
