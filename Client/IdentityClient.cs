@@ -33,10 +33,14 @@ public sealed class IdentityClient(HttpClient httpClient) : IIdentityClient
         await httpClient.PostAsJsonAsync(ApiRoutes.Auth.Logout, request, ClientJson.Default, ct);
     }
 
-    public async Task AssignRoleAsync(Guid userId, AssignRoleRequest request, string bearerToken, CancellationToken ct = default)
+    public async Task UpdateUserRolesAsync(
+        Guid userId,
+        UpdateUserRolesRequest request,
+        string bearerToken,
+        CancellationToken ct = default)
     {
         var path = $"{ApiRoutes.PrefixV1}/users/{userId}/roles";
-        using var req = new HttpRequestMessage(HttpMethod.Post, path);
+        using var req = new HttpRequestMessage(HttpMethod.Put, path);
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
         req.Content = JsonContent.Create(request, options: ClientJson.Default);
         await httpClient.SendAsync(req, ct);

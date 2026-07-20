@@ -1,10 +1,12 @@
-﻿using IdentityService.Data.Migrations;
+﻿using IdentityService.Data;
+using IdentityService.Data.Migrations;
 using IdentityService.Data.Seeding;
 using IdentityService.Domain;
 using IdentityService.Host;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
@@ -13,8 +15,8 @@ namespace IdentityService.IntegrationTests.Infrastructure;
 
 public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsyncLifetime
 {
-    private const string TestDbName = "identity_test";
-    private const string TestUser = "identity_test_user";
+    internal const string TestDbName = "identity_test";
+    internal const string TestUser = "identity_test_user";
     private const string TestPassword = "identity_test_password";
     internal const string TestIssuer = "https://identity.test";
     internal const string TestAudience = "identity.api";
@@ -25,11 +27,6 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
 
     public async Task InitializeAsync()
     {
-        if (!DockerAvailability.IsAvailable)
-        {
-            return;
-        }
-
         postgres = new PostgreSqlBuilder()
             .WithDatabase(TestDbName)
             .WithUsername(TestUser)
@@ -37,28 +34,46 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
             .WithCleanUp(true)
             .Build();
 
-        await postgres.StartAsync();
-        connectionString = postgres.GetConnectionString();
+        try
+        {
+            await postgres.StartAsync();
+            connectionString = postgres.GetConnectionString();
 
-        // Services тригерит ConfigureWebHost — вызываем после установки connectionString.
-        using var scope = Services.CreateScope();
-        var sp = scope.ServiceProvider;
-        await sp.GetRequiredService<IMigrationManager>().MigrateAsync();
-        await RoleSeeder.SeedRolesAsync(sp.GetRequiredService<RoleManager<ApplicationRole>>());
+            // Services триггерит ConfigureWebHost — вызываем после установки connectionString.
+            using var scope = Services.CreateScope();
+            var sp = scope.ServiceProvider;
+            var db = sp.GetRequiredService<AppDbContext>();
+
+            if (!String.Equals(db.Database.GetDbConnection().Database, TestDbName, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    $"Integration tests must use the '{TestDbName}' container database.");
+            }
+
+            await sp.GetRequiredService<IMigrationManager>().MigrateAsync();
+            await RoleSeeder.SeedRolesAsync(sp.GetRequiredService<RoleManager<ApplicationRole>>());
+        }
+        catch
+        {
+            await postgres.DisposeAsync();
+            postgres = null;
+            connectionString = null;
+            throw;
+        }
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        var testConnectionString = connectionString
+            ?? throw new InvalidOperationException(
+                "Integration test host cannot start without its PostgreSQL container.");
+
         var overrides = new Dictionary<string, string?>
         {
             { "Jwt:Issuer", TestIssuer },
-            { "Jwt:Audience", TestAudience }
+            { "Jwt:Audience", TestAudience },
+            { "ConnectionStrings:ConnectionString", testConnectionString }
         };
-
-        if (connectionString is not null)
-        {
-            overrides["ConnectionStrings:ConnectionString"] = connectionString;
-        }
 
         builder.ConfigureAppConfiguration(config =>
             config.AddInMemoryCollection(overrides));
@@ -70,7 +85,7 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
     {
         if (postgres is not null)
         {
-            await postgres.StopAsync();
+            await postgres.DisposeAsync();
         }
     }
 }

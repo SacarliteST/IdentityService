@@ -17,7 +17,7 @@ internal sealed class ListUsersEndpoint : IEndpoint
             .Produces<PagedResponse<UserListItemDto>>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)
-            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+            .ProducesValidationProblem()
             .AddEndpointFilter<ValidationFilter<GetUsersRequest>>()
             .RequireAuthorization(policy => policy.RequireRole(RoleNames.Admin));
     }

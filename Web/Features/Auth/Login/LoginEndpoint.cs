@@ -16,7 +16,7 @@ internal sealed class LoginEndpoint : IEndpoint
             .WithDescription("Проверяет учётные данные и возвращает пару токенов.")
             .Produces<TokenResponse>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+            .ProducesValidationProblem()
             .AddEndpointFilter<ValidationFilter<LoginRequest>>()
             .AllowAnonymous();
     }

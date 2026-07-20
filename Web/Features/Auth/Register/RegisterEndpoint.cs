@@ -16,7 +16,7 @@ internal sealed class RegisterEndpoint : IEndpoint
             .WithDescription("Создаёт пользователя с ролью Student и возвращает пару токенов.")
             .Produces<TokenResponse>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status409Conflict)
-            .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+            .ProducesValidationProblem()
             .AddEndpointFilter<ValidationFilter<RegisterRequest>>()
             .AllowAnonymous();
     }

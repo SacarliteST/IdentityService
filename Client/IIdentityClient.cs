@@ -20,6 +20,10 @@ public interface IIdentityClient
     /// <summary>Отзывает refresh-токен (выход). Идемпотентно.</summary>
     Task LogoutAsync(RefreshRequest request, CancellationToken ct = default);
 
-    /// <summary>Присваивает роль пользователю. Требует Bearer-токен Admin.</summary>
-    Task AssignRoleAsync(Guid userId, AssignRoleRequest request, string bearerToken, CancellationToken ct = default);
+    /// <summary>Атомарно заменяет роли пользователя. Требует Bearer-токен Admin.</summary>
+    Task UpdateUserRolesAsync(
+        Guid userId,
+        UpdateUserRolesRequest request,
+        string bearerToken,
+        CancellationToken ct = default);
 }

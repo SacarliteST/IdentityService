@@ -25,9 +25,16 @@ public static class ResultExtensions
 
     public static IResult ToProblem(Error error)
     {
+        if (error.Type == ErrorType.Validation)
+        {
+            return Results.ValidationProblem(
+                new Dictionary<string, string[]> { [String.Empty] = [error.Message] },
+                statusCode: StatusCodes.Status422UnprocessableEntity,
+                title: error.Code);
+        }
+
         var statusCode = error.Type switch
         {
-            ErrorType.Validation => StatusCodes.Status422UnprocessableEntity,
             ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
             ErrorType.NotFound => StatusCodes.Status404NotFound,
             ErrorType.Conflict => StatusCodes.Status409Conflict,

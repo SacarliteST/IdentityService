@@ -27,6 +27,16 @@ internal static class AuthErrors
     public static Error RoleNotFound(string role) =>
         DomainErrors<ApplicationUser>.Conflict($"Роль '{role}' не существует.", nameof(RoleNotFound));
 
+    public static Error CannotRemoveOwnAdminRole() =>
+        DomainErrors<ApplicationUser>.Conflict(
+            "Нельзя снять роль Admin у собственной учётной записи.",
+            nameof(CannotRemoveOwnAdminRole));
+
+    public static Error CannotRemoveLastAdminRole() =>
+        DomainErrors<ApplicationUser>.Conflict(
+            "Нельзя снять роль у последнего активного администратора.",
+            nameof(CannotRemoveLastAdminRole));
+
     /// <summary>
     /// Преобразует <see cref="IdentityResult"/> в ошибку:
     /// дубль email → EmailTaken (409); прочее → Validation (422).
