@@ -22,6 +22,15 @@ public sealed class OpenApiContractTests(TestApplication app) : ApiTestBase(app)
         rolesPath.TryGetProperty("put", out _).ShouldBeTrue();
         rolesPath.TryGetProperty("post", out _).ShouldBeFalse();
 
+        root.GetProperty("paths")
+            .GetProperty("/api/v1/users/{id}/block")
+            .TryGetProperty("post", out _)
+            .ShouldBeTrue();
+        root.GetProperty("paths")
+            .GetProperty("/api/v1/users/{id}/unblock")
+            .TryGetProperty("post", out _)
+            .ShouldBeTrue();
+
         var roleSchema = schemas.GetProperty("UserRole");
         roleSchema.GetProperty("type").GetString().ShouldBe("string");
         roleSchema.GetProperty("enum")

@@ -37,6 +37,21 @@ internal static class AuthErrors
             "Нельзя снять роль у последнего активного администратора.",
             nameof(CannotRemoveLastAdminRole));
 
+    public static Error UserBlocked() =>
+        DomainErrors<ApplicationUser>.Unauthorized(
+            "Учётная запись заблокирована.",
+            nameof(UserBlocked));
+
+    public static Error CannotBlockSelf() =>
+        DomainErrors<ApplicationUser>.Conflict(
+            "Нельзя заблокировать собственную учётную запись.",
+            nameof(CannotBlockSelf));
+
+    public static Error CannotBlockLastActiveAdmin() =>
+        DomainErrors<ApplicationUser>.Conflict(
+            "Нельзя заблокировать последнего активного администратора.",
+            nameof(CannotBlockLastActiveAdmin));
+
     /// <summary>
     /// Преобразует <see cref="IdentityResult"/> в ошибку:
     /// дубль email → EmailTaken (409); прочее → Validation (422).

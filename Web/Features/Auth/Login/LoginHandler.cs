@@ -22,6 +22,11 @@ internal sealed class LoginHandler(
             return Result<TokenResponse>.Fail(AuthErrors.InvalidCredentials());
         }
 
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            return Result<TokenResponse>.Fail(AuthErrors.UserBlocked());
+        }
+
         user.LastLoginAt = timeProvider.GetUtcNow();
         var updateResult = await userManager.UpdateAsync(user);
         if (!updateResult.Succeeded)

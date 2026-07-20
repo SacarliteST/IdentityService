@@ -32,4 +32,17 @@ public interface IIdentityClient
         UpdateUserRolesRequest request,
         string bearerToken,
         CancellationToken ct = default);
+
+    /// <summary>Блокирует пользователя и отзывает его refresh-токены.</summary>
+    Task BlockUserAsync(
+        Guid userId,
+        BlockUserRequest request,
+        string bearerToken,
+        CancellationToken ct = default);
+
+    /// <summary>Снимает административную блокировку пользователя.</summary>
+    Task UnblockUserAsync(
+        Guid userId,
+        string bearerToken,
+        CancellationToken ct = default);
 }

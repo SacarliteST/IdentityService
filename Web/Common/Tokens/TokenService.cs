@@ -112,6 +112,13 @@ internal sealed class TokenService(
             return Result<TokenPair>.Fail(AuthErrors.UserNotFound(token.UserId));
         }
 
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            token.Revoke(now);
+            await db.SaveChangesAsync(ct);
+            return Result<TokenPair>.Fail(AuthErrors.UserBlocked());
+        }
+
         var roles = await userManager.GetRolesAsync(user);
         var newPair = await IssueAsync(user, roles.ToList(), ct);
 

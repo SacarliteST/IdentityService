@@ -58,4 +58,28 @@ public sealed class IdentityClient(HttpClient httpClient) : IIdentityClient
         req.Content = JsonContent.Create(request, options: ClientJson.Default);
         await httpClient.SendAsync(req, ct);
     }
+
+    public async Task BlockUserAsync(
+        Guid userId,
+        BlockUserRequest request,
+        string bearerToken,
+        CancellationToken ct = default)
+    {
+        var path = $"{ApiRoutes.PrefixV1}/users/{userId}/block";
+        using var req = new HttpRequestMessage(HttpMethod.Post, path);
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+        req.Content = JsonContent.Create(request, options: ClientJson.Default);
+        await httpClient.SendAsync(req, ct);
+    }
+
+    public async Task UnblockUserAsync(
+        Guid userId,
+        string bearerToken,
+        CancellationToken ct = default)
+    {
+        var path = $"{ApiRoutes.PrefixV1}/users/{userId}/unblock";
+        using var req = new HttpRequestMessage(HttpMethod.Post, path);
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+        await httpClient.SendAsync(req, ct);
+    }
 }
