@@ -9,7 +9,8 @@ namespace IdentityService.Web.Features.Auth.Login;
 
 internal sealed class LoginHandler(
     UserManager<ApplicationUser> userManager,
-    ITokenService tokenService) : IRequestHandler<LoginCommand, Result<TokenResponse>>
+    ITokenService tokenService,
+    TimeProvider timeProvider) : IRequestHandler<LoginCommand, Result<TokenResponse>>
 {
     public async Task<Result<TokenResponse>> Handle(LoginCommand cmd, CancellationToken ct)
     {
@@ -19,6 +20,13 @@ internal sealed class LoginHandler(
         if (user is null || !await userManager.CheckPasswordAsync(user, cmd.Password))
         {
             return Result<TokenResponse>.Fail(AuthErrors.InvalidCredentials());
+        }
+
+        user.LastLoginAt = timeProvider.GetUtcNow();
+        var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            return Result<TokenResponse>.Fail(AuthErrors.FromIdentityErrors(updateResult.Errors));
         }
 
         var roles = await userManager.GetRolesAsync(user);

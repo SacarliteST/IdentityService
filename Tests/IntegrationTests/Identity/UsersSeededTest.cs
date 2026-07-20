@@ -37,14 +37,17 @@ public sealed class UsersSeededTest(TestApplication testApplication) : ApiTestBa
             .AddInMemoryCollection(values)
             .Build();
         var userManager = Scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var timeProvider = Scope.ServiceProvider.GetRequiredService<TimeProvider>();
 
-        await UserSeeder.SeedUsersAsync(userManager, configuration);
-        await UserSeeder.SeedUsersAsync(userManager, configuration);
+        await UserSeeder.SeedUsersAsync(userManager, configuration, timeProvider);
+        await UserSeeder.SeedUsersAsync(userManager, configuration, timeProvider);
 
         foreach (var expected in users)
         {
             var user = await userManager.FindByEmailAsync(expected.Email);
             user.ShouldNotBeNull();
+            user.CreatedAt.ShouldBeGreaterThan(DateTimeOffset.UnixEpoch);
+            user.LastLoginAt.ShouldBeNull();
             (await userManager.IsInRoleAsync(user, expected.Role)).ShouldBeTrue();
             (await userManager.CheckPasswordAsync(user, expected.Password)).ShouldBeTrue();
         }

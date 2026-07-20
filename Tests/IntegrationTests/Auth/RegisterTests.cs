@@ -1,7 +1,10 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using IdentityService.Contracts;
+using IdentityService.Domain;
 using IdentityService.IntegrationTests.Infrastructure;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace IdentityService.IntegrationTests.Auth;
@@ -23,6 +26,13 @@ public sealed class RegisterTests(TestApplication app) : ApiTestBase(app)
         body.RefreshToken.ShouldNotBeNullOrEmpty();
         body.Email.ShouldBe(request.Email);
         body.Roles.ShouldContain(RoleNames.Student);
+
+        var userManager = Scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = await userManager.FindByEmailAsync(request.Email);
+        user.ShouldNotBeNull();
+        user.CreatedAt.ShouldBeGreaterThan(DateTimeOffset.UnixEpoch);
+        user.UpdatedAt.ShouldBeNull();
+        user.LastLoginAt.ShouldBeNull();
     }
 
     [DockerFact]

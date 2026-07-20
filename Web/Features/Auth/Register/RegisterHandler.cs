@@ -9,7 +9,8 @@ namespace IdentityService.Web.Features.Auth.Register;
 
 internal sealed class RegisterHandler(
     UserManager<ApplicationUser> userManager,
-    ITokenService tokenService) : IRequestHandler<RegisterCommand, Result<TokenResponse>>
+    ITokenService tokenService,
+    TimeProvider timeProvider) : IRequestHandler<RegisterCommand, Result<TokenResponse>>
 {
     public async Task<Result<TokenResponse>> Handle(RegisterCommand cmd, CancellationToken ct)
     {
@@ -17,7 +18,8 @@ internal sealed class RegisterHandler(
         {
             Email = cmd.Email,
             UserName = cmd.Email,
-            DisplayName = cmd.DisplayName
+            DisplayName = cmd.DisplayName,
+            CreatedAt = timeProvider.GetUtcNow()
         };
 
         var result = await userManager.CreateAsync(user, cmd.Password);

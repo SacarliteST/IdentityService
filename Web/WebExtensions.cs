@@ -88,6 +88,7 @@ public static class WebExtensions
         await RoleSeeder.SeedRolesAsync(sp.GetRequiredService<RoleManager<ApplicationRole>>());
         await UserSeeder.SeedUsersAsync(
             sp.GetRequiredService<UserManager<ApplicationUser>>(),
-            app.Configuration);
+            app.Configuration,
+            sp.GetRequiredService<TimeProvider>());
     }
 }

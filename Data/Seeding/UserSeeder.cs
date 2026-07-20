@@ -12,7 +12,8 @@ public static class UserSeeder
 {
     public static async Task SeedUsersAsync(
         UserManager<ApplicationUser> userManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        TimeProvider timeProvider)
     {
         foreach (var section in configuration.GetSection("InitialUsers").GetChildren())
         {
@@ -37,7 +38,8 @@ public static class UserSeeder
                     UserName = email,
                     Email = email,
                     DisplayName = displayName,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    CreatedAt = timeProvider.GetUtcNow()
                 };
 
                 EnsureSucceeded(

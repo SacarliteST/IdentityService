@@ -7,6 +7,7 @@ using Shouldly;
 
 namespace IdentityService.IntegrationTests.Identity;
 
+[Collection(nameof(IntegrationTestCollection))]
 public sealed class RolesSeededTest(TestApplication testApplication) : ApiTestBase(testApplication)
 {
     [DockerTheory]

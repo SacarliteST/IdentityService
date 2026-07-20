@@ -1,7 +1,10 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using IdentityService.Contracts;
+using IdentityService.Domain;
 using IdentityService.IntegrationTests.Infrastructure;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
 namespace IdentityService.IntegrationTests.Auth;
@@ -18,6 +21,7 @@ public sealed class LoginTests(TestApplication app) : ApiTestBase(app)
         await HttpClient.PostAsJsonAsync(ApiRoutes.Auth.Register,
             new RegisterRequest(email, password, null));
 
+        var loginStartedAt = DateTimeOffset.UtcNow;
         var response = await HttpClient.PostAsJsonAsync(ApiRoutes.Auth.Login,
             new LoginRequest(email, password));
 
@@ -27,6 +31,13 @@ public sealed class LoginTests(TestApplication app) : ApiTestBase(app)
         body.AccessToken.ShouldNotBeNullOrEmpty();
         body.RefreshToken.ShouldNotBeNullOrEmpty();
         body.Roles.ShouldContain(RoleNames.Student);
+
+        var userManager = Scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = await userManager.FindByEmailAsync(email);
+        user.ShouldNotBeNull();
+        user.LastLoginAt.ShouldNotBeNull();
+        user.LastLoginAt.Value.ShouldBeGreaterThanOrEqualTo(loginStartedAt);
+        user.LastLoginAt.Value.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
     }
 
     [DockerFact]
@@ -40,6 +51,11 @@ public sealed class LoginTests(TestApplication app) : ApiTestBase(app)
             new LoginRequest(email, "WrongPassword99!"));
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+
+        var userManager = Scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = await userManager.FindByEmailAsync(email);
+        user.ShouldNotBeNull();
+        user.LastLoginAt.ShouldBeNull();
     }
 
     [DockerFact]

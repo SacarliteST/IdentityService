@@ -6,6 +6,7 @@ using Shouldly;
 
 namespace IdentityService.IntegrationTests.Identity;
 
+[Collection(nameof(IntegrationTestCollection))]
 public sealed class UserManagerTest(TestApplication testApplication) : ApiTestBase(testApplication)
 {
     private UserManager<ApplicationUser> UserManager =>
