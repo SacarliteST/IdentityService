@@ -10,9 +10,9 @@ internal sealed class OpenIdConfigurationEndpoint(IOptions<JwtOptions> jwtOption
     {
         app.MapGet("/.well-known/openid-configuration", Handle)
             .WithName("OpenIdConfiguration")
-            .WithTags("Discovery")
-            .WithSummary("OpenID Connect discovery document")
-            .WithDescription("Minimal OIDC discovery document. Set Authority = Issuer in client JwtBearer options.")
+            .WithTags("Метаданные")
+            .WithSummary("Конфигурация OpenID Connect")
+            .WithDescription("Возвращает метаданные OIDC. В сервисах-клиентах Authority должен совпадать с issuer.")
             .Produces<object>(StatusCodes.Status200OK, "application/json")
             .AllowAnonymous();
     }

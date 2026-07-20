@@ -11,7 +11,7 @@ internal sealed class LoginEndpoint : IEndpoint
     {
         app.MapPost(ApiRoutes.Auth.Login, Handle)
             .WithName("Login")
-            .WithTags("Auth")
+            .WithTags("Аутентификация")
             .WithSummary("Аутентификация пользователя")
             .WithDescription("Проверяет учётные данные и возвращает пару токенов.")
             .Produces<TokenResponse>()

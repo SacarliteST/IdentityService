@@ -11,11 +11,13 @@ internal sealed class RefreshEndpoint : IEndpoint
     {
         app.MapPost(ApiRoutes.Auth.Refresh, Handle)
             .WithName("Refresh")
-            .WithTags("Auth")
+            .WithTags("Аутентификация")
             .WithSummary("Обновление токенов")
             .WithDescription("Ротирует refresh-токен. Повторное использование отозванного токена инициирует отзыв всех сессий.")
             .Produces<TokenResponse>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesValidationProblem()
+            .AddEndpointFilter<ValidationFilter<RefreshRequest>>()
             .AllowAnonymous();
     }
 

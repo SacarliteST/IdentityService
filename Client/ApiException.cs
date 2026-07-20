@@ -1,7 +1,7 @@
 ﻿namespace IdentityService.Client;
 
 public class ApiException(int statusCode, ApiProblem? problem)
-    : Exception(problem?.Detail ?? problem?.Title ?? "API error")
+    : Exception(problem?.Detail ?? problem?.Title ?? "Ошибка Identity API")
 {
     public int StatusCode { get; } = statusCode;
     public ApiProblem? Problem { get; } = problem;

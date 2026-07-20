@@ -11,9 +11,9 @@ internal sealed class GetUserActivityEndpoint : IEndpoint
     {
         app.MapGet(ApiRoutes.Users.Activity, Handle)
             .WithName("GetUserActivity")
-            .WithTags("Audit")
+            .WithTags("Аудит")
             .WithSummary("Активность пользователя")
-            .WithDescription("Возвращает события пользователя как инициатора или объекта действия. Только для Admin.")
+            .WithDescription("Возвращает события пользователя как инициатора или объекта действия. Доступно только для роли Admin.")
             .Produces<PagedResponse<AuditEventDto>>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

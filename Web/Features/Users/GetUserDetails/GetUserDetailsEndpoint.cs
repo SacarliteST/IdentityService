@@ -11,9 +11,9 @@ internal sealed class GetUserDetailsEndpoint : IEndpoint
     {
         app.MapGet(ApiRoutes.Users.ById, Handle)
             .WithName("GetUserDetails")
-            .WithTags("Users")
+            .WithTags("Пользователи")
             .WithSummary("Карточка пользователя")
-            .WithDescription("Возвращает пользователя и его роли. Только для Admin.")
+            .WithDescription("Возвращает пользователя и его роли. Доступно только для роли Admin.")
             .Produces<UserDetailsDto>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

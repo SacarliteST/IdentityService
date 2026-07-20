@@ -12,9 +12,9 @@ internal sealed class UpdateUserRolesEndpoint : IEndpoint
     {
         app.MapPut(ApiRoutes.Users.Roles, Handle)
             .WithName("UpdateUserRoles")
-            .WithTags("Users")
+            .WithTags("Пользователи")
             .WithSummary("Замена ролей пользователя")
-            .WithDescription("Атомарно заменяет полный набор ролей. Только для Admin.")
+            .WithDescription("Атомарно заменяет полный набор ролей. Доступно только для роли Admin.")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

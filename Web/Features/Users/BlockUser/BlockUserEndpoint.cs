@@ -12,9 +12,9 @@ internal sealed class BlockUserEndpoint : IEndpoint
     {
         app.MapPost(ApiRoutes.Users.Block, Handle)
             .WithName("BlockUser")
-            .WithTags("Users")
+            .WithTags("Пользователи")
             .WithSummary("Блокировка пользователя")
-            .WithDescription("Блокирует вход и отзывает активные refresh-токены. Только для Admin.")
+            .WithDescription("Блокирует вход и отзывает активные refresh-токены. Доступно только для роли Admin.")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

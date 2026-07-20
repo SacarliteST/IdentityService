@@ -11,9 +11,9 @@ internal sealed class ListUsersEndpoint : IEndpoint
     {
         app.MapGet(ApiRoutes.Users.List, Handle)
             .WithName("ListUsers")
-            .WithTags("Users")
+            .WithTags("Пользователи")
             .WithSummary("Список пользователей")
-            .WithDescription("Возвращает постраничный список пользователей. Только для Admin.")
+            .WithDescription("Возвращает постраничный список пользователей. Доступно только для роли Admin.")
             .Produces<PagedResponse<UserListItemDto>>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

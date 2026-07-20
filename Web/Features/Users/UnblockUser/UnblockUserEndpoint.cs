@@ -12,9 +12,9 @@ internal sealed class UnblockUserEndpoint : IEndpoint
     {
         app.MapPost(ApiRoutes.Users.Unblock, Handle)
             .WithName("UnblockUser")
-            .WithTags("Users")
+            .WithTags("Пользователи")
             .WithSummary("Разблокировка пользователя")
-            .WithDescription("Снимает блокировку и очищает её административные метаданные. Только для Admin.")
+            .WithDescription("Снимает блокировку и очищает её административные метаданные. Доступно только для роли Admin.")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

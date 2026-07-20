@@ -8,9 +8,13 @@ internal sealed class UpdateUserRolesValidator : AbstractValidator<UpdateUserRol
     public UpdateUserRolesValidator()
     {
         RuleFor(request => request.Roles)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
+            .WithMessage("Выберите хотя бы одну роль.")
             .Must(roles => roles.Distinct().Count() == roles.Count)
-            .WithMessage("Roles must not contain duplicates.");
-        RuleForEach(request => request.Roles).IsInEnum();
+            .WithMessage("Роли не должны повторяться.");
+        RuleForEach(request => request.Roles)
+            .IsInEnum()
+            .WithMessage("Указана неизвестная роль.");
     }
 }

@@ -10,6 +10,7 @@ internal sealed class BlockUserValidator : AbstractValidator<BlockUserRequest>
         RuleFor(request => request.Reason)
             .Must(reason => reason is null || !String.IsNullOrWhiteSpace(reason))
             .WithMessage("Причина не должна состоять только из пробелов.")
-            .MaximumLength(500);
+            .MaximumLength(500)
+            .WithMessage("Причина блокировки не должна превышать 500 символов.");
     }
 }

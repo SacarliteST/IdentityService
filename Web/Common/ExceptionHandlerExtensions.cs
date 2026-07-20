@@ -16,6 +16,7 @@ internal static class ExceptionHandlerExtensions
 
                 var statusCode = exception switch
                 {
+                    BadHttpRequestException badRequest => badRequest.StatusCode,
                     ArgumentException => StatusCodes.Status400BadRequest,
                     _ => StatusCodes.Status500InternalServerError
                 };
@@ -33,7 +34,7 @@ internal static class ExceptionHandlerExtensions
                 {
                     Status = statusCode,
                     Title = GetTitle(statusCode),
-                    Detail = exception?.Message
+                    Detail = GetDetail(statusCode)
                 });
             });
         });
@@ -43,7 +44,13 @@ internal static class ExceptionHandlerExtensions
 
     private static string GetTitle(int statusCode) => statusCode switch
     {
-        StatusCodes.Status400BadRequest => "Bad Request",
-        _ => "Internal Server Error"
+        StatusCodes.Status400BadRequest => "Некорректный запрос",
+        _ => "Внутренняя ошибка сервера"
+    };
+
+    private static string GetDetail(int statusCode) => statusCode switch
+    {
+        StatusCodes.Status400BadRequest => "Проверьте формат и значения параметров запроса.",
+        _ => "При обработке запроса произошла непредвиденная ошибка."
     };
 }

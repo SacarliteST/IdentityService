@@ -30,7 +30,8 @@ public static class ResultExtensions
             return Results.ValidationProblem(
                 new Dictionary<string, string[]> { [String.Empty] = [error.Message] },
                 statusCode: StatusCodes.Status422UnprocessableEntity,
-                title: error.Code);
+                title: "Ошибка проверки данных",
+                extensions: new Dictionary<string, object?> { ["code"] = error.Code });
         }
 
         var statusCode = error.Type switch
@@ -41,6 +42,18 @@ public static class ResultExtensions
             _ => StatusCodes.Status500InternalServerError
         };
 
-        return TypedResults.Problem(detail: error.Message, statusCode: statusCode, title: error.Code);
+        return TypedResults.Problem(
+            detail: error.Message,
+            statusCode: statusCode,
+            title: GetTitle(error.Type),
+            extensions: new Dictionary<string, object?> { ["code"] = error.Code });
     }
+
+    private static string GetTitle(ErrorType errorType) => errorType switch
+    {
+        ErrorType.Unauthorized => "Ошибка авторизации",
+        ErrorType.NotFound => "Ресурс не найден",
+        ErrorType.Conflict => "Конфликт данных",
+        _ => "Внутренняя ошибка сервера"
+    };
 }

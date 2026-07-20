@@ -21,7 +21,9 @@ internal static class AuthErrors
 
     /// <summary>Пользователь с заданным id не найден. 404 NotFound.</summary>
     public static Error UserNotFound(object id) =>
-        DomainErrors<ApplicationUser>.NotFound(id, nameof(UserNotFound));
+        Error.NotFound(
+            $"ApplicationUser.{nameof(UserNotFound)}",
+            $"Пользователь с id '{id}' не найден.");
 
     /// <summary>Роль не существует. 409 Conflict.</summary>
     public static Error RoleNotFound(string role) =>

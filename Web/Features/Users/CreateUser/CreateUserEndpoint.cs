@@ -12,9 +12,9 @@ internal sealed class CreateUserEndpoint : IEndpoint
     {
         app.MapPost(ApiRoutes.Users.List, Handle)
             .WithName("CreateUser")
-            .WithTags("Users")
+            .WithTags("Пользователи")
             .WithSummary("Административное создание пользователя")
-            .WithDescription("Создаёт пользователя с полным набором ролей без выдачи токенов. Только для Admin.")
+            .WithDescription("Создаёт пользователя с полным набором ролей без выдачи токенов. Доступно только для роли Admin.")
             .Produces<UserDetailsDto>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

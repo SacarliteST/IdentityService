@@ -23,7 +23,7 @@ internal static class OpenApiExtensions
                 Type = SecuritySchemeType.Http,
                 Scheme = "bearer",
                 BearerFormat = "JWT",
-                Description = "Введите JWT access token без префикса Bearer."
+                Description = "Введите JWT-токен доступа без префикса Bearer."
             });
 
             c.AddSecurityRequirement(document => new OpenApiSecurityRequirement

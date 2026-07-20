@@ -9,9 +9,9 @@ internal sealed class JwksEndpoint(ISigningKeyProvider signingKeyProvider) : IEn
     {
         app.MapGet("/.well-known/jwks.json", Handle)
             .WithName("Jwks")
-            .WithTags("Discovery")
-            .WithSummary("JSON Web Key Set")
-            .WithDescription("Returns the public RSA key used to verify JWT signatures. Issuer must match Authority configured in client services.")
+            .WithTags("Метаданные")
+            .WithSummary("Набор открытых ключей JWKS")
+            .WithDescription("Возвращает открытый RSA-ключ для проверки подписи JWT. Issuer должен совпадать с Authority клиентского сервиса.")
             .Produces<object>(StatusCodes.Status200OK, "application/json")
             .AllowAnonymous();
     }

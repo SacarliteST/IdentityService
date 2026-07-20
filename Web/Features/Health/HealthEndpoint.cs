@@ -8,7 +8,7 @@ internal sealed class HealthEndpoint : IEndpoint
     {
         app.MapGet("/health", () => TypedResults.Ok())
             .WithName("Health")
-            .WithTags("Health")
+            .WithTags("Состояние")
             .Produces(StatusCodes.Status200OK);
     }
 }

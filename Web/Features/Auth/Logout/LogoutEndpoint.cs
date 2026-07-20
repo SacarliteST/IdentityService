@@ -11,10 +11,12 @@ internal sealed class LogoutEndpoint : IEndpoint
     {
         app.MapPost(ApiRoutes.Auth.Logout, Handle)
             .WithName("Logout")
-            .WithTags("Auth")
+            .WithTags("Аутентификация")
             .WithSummary("Выход из системы")
             .WithDescription("Отзывает refresh-токен. Идемпотентно: повторный вызов возвращает 204.")
             .Produces(StatusCodes.Status204NoContent)
+            .ProducesValidationProblem()
+            .AddEndpointFilter<ValidationFilter<RefreshRequest>>()
             .AllowAnonymous();
     }
 

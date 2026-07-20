@@ -24,7 +24,8 @@ internal sealed class ValidationFilter<TRequest>(IServiceProvider sp) : IEndpoin
         {
             return Results.ValidationProblem(
                 result.ToDictionary(),
-                statusCode: StatusCodes.Status422UnprocessableEntity);
+                statusCode: StatusCodes.Status422UnprocessableEntity,
+                title: "Ошибка проверки данных");
         }
 
         return await next(context);

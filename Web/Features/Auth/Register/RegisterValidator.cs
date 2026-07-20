@@ -9,10 +9,14 @@ internal sealed class RegisterValidator : AbstractValidator<RegisterRequest>
     {
         RuleFor(x => x.Email)
             .NotEmpty()
-            .EmailAddress();
+            .WithMessage("Укажите email.")
+            .EmailAddress()
+            .WithMessage("Введите корректный email.");
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .MinimumLength(8);
+            .WithMessage("Укажите пароль.")
+            .MinimumLength(8)
+            .WithMessage("Пароль должен содержать не менее 8 символов.");
     }
 }

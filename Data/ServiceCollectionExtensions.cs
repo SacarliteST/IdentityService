@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
                 opt.Password.RequireNonAlphanumeric = false;
                 opt.User.RequireUniqueEmail = true;
             })
+            .AddErrorDescriber<RussianIdentityErrorDescriber>()
             .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<AppDbContext>();
 

@@ -11,9 +11,9 @@ internal sealed class ListAuditEventsEndpoint : IEndpoint
     {
         app.MapGet(ApiRoutes.Audit.List, Handle)
             .WithName("ListAuditEvents")
-            .WithTags("Audit")
+            .WithTags("Аудит")
             .WithSummary("Журнал аудита")
-            .WithDescription("Возвращает постраничный журнал событий. Только для Admin.")
+            .WithDescription("Возвращает постраничный журнал событий. Доступно только для роли Admin.")
             .Produces<PagedResponse<AuditEventDto>>()
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)

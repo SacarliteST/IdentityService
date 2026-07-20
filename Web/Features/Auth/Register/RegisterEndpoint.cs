@@ -11,7 +11,7 @@ internal sealed class RegisterEndpoint : IEndpoint
     {
         app.MapPost(ApiRoutes.Auth.Register, Handle)
             .WithName("Register")
-            .WithTags("Auth")
+            .WithTags("Аутентификация")
             .WithSummary("Регистрация нового пользователя")
             .WithDescription("Создаёт пользователя с ролью Student и возвращает пару токенов.")
             .Produces<TokenResponse>(StatusCodes.Status201Created)

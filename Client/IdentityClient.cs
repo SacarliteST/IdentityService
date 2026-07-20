@@ -11,21 +11,21 @@ public sealed class IdentityClient(HttpClient httpClient) : IIdentityClient
     {
         var response = await httpClient.PostAsJsonAsync(ApiRoutes.Auth.Register, request, ClientJson.Default, ct);
         return await response.Content.ReadFromJsonAsync<TokenResponse>(ClientJson.Default, ct)
-               ?? throw new InvalidOperationException("Empty response from Register.");
+               ?? throw new InvalidOperationException("Identity API вернул пустой ответ при регистрации.");
     }
 
     public async Task<TokenResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {
         var response = await httpClient.PostAsJsonAsync(ApiRoutes.Auth.Login, request, ClientJson.Default, ct);
         return await response.Content.ReadFromJsonAsync<TokenResponse>(ClientJson.Default, ct)
-               ?? throw new InvalidOperationException("Empty response from Login.");
+               ?? throw new InvalidOperationException("Identity API вернул пустой ответ при входе.");
     }
 
     public async Task<TokenResponse> RefreshAsync(RefreshRequest request, CancellationToken ct = default)
     {
         var response = await httpClient.PostAsJsonAsync(ApiRoutes.Auth.Refresh, request, ClientJson.Default, ct);
         return await response.Content.ReadFromJsonAsync<TokenResponse>(ClientJson.Default, ct)
-               ?? throw new InvalidOperationException("Empty response from Refresh.");
+               ?? throw new InvalidOperationException("Identity API вернул пустой ответ при обновлении токенов.");
     }
 
     public async Task LogoutAsync(RefreshRequest request, CancellationToken ct = default)
@@ -43,7 +43,7 @@ public sealed class IdentityClient(HttpClient httpClient) : IIdentityClient
         req.Content = JsonContent.Create(request, options: ClientJson.Default);
         var response = await httpClient.SendAsync(req, ct);
         return await response.Content.ReadFromJsonAsync<UserDetailsDto>(ClientJson.Default, ct)
-            ?? throw new InvalidOperationException("Empty response from CreateUser.");
+            ?? throw new InvalidOperationException("Identity API вернул пустой ответ при создании пользователя.");
     }
 
     public async Task UpdateUserRolesAsync(
@@ -129,7 +129,7 @@ public sealed class IdentityClient(HttpClient httpClient) : IIdentityClient
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
         var response = await httpClient.SendAsync(req, ct);
         return await response.Content.ReadFromJsonAsync<T>(ClientJson.Default, ct)
-            ?? throw new InvalidOperationException($"Empty response from {path}.");
+            ?? throw new InvalidOperationException($"Identity API вернул пустой ответ для '{path}'.");
     }
 
     private static string BuildAuditQuery(
