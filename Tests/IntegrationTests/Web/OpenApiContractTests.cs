@@ -40,6 +40,7 @@ public sealed class OpenApiContractTests(TestApplication app) : ApiTestBase(app)
             "email",
             "roles");
         AssertRequired(schemas.GetProperty("UpdateUserRolesRequest"), "roles");
+        AssertRequired(schemas.GetProperty("CreateUserRequest"), "email", "password", "roles");
         AssertRequired(schemas.GetProperty("ValidationProblemDetails"), "errors");
 
         var loginValidationSchema = root

@@ -33,6 +33,19 @@ public sealed class IdentityClient(HttpClient httpClient) : IIdentityClient
         await httpClient.PostAsJsonAsync(ApiRoutes.Auth.Logout, request, ClientJson.Default, ct);
     }
 
+    public async Task<UserDetailsDto> CreateUserAsync(
+        CreateUserRequest request,
+        string bearerToken,
+        CancellationToken ct = default)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post, ApiRoutes.Users.List);
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+        req.Content = JsonContent.Create(request, options: ClientJson.Default);
+        var response = await httpClient.SendAsync(req, ct);
+        return await response.Content.ReadFromJsonAsync<UserDetailsDto>(ClientJson.Default, ct)
+            ?? throw new InvalidOperationException("Empty response from CreateUser.");
+    }
+
     public async Task UpdateUserRolesAsync(
         Guid userId,
         UpdateUserRolesRequest request,
