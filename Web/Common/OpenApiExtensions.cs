@@ -32,6 +32,7 @@ internal static class OpenApiExtensions
             });
 
             c.SupportNonNullableReferenceTypes();
+            c.NonNullableReferenceTypesAsRequired();
             c.UseAllOfToExtendReferenceSchemas();
 
             foreach (var assembly in new[] { typeof(IWebMarker).Assembly, typeof(ApiRoutes).Assembly })

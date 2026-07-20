@@ -14,6 +14,9 @@ public static class ApiRoutes
 
     public static class Users
     {
+        public const string List = $"{PrefixV1}/users";
+        public const string ById = $"{PrefixV1}/users/{{id}}";
+
         /// <summary>Route template — {id} заменяется на Guid пользователя.</summary>
         public const string Roles = $"{PrefixV1}/users/{{id}}/roles";
     }
