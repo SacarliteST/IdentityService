@@ -17,6 +17,8 @@ namespace IdentityService.Web;
 /// </summary>
 public static class WebExtensions
 {
+    private const string FrontendCorsPolicy = "Frontend";
+
     /// <summary>Регистрирует все сервисы Web-слоя (данные, CQRS, эндпоинты, ключи, токены, OpenAPI).</summary>
     public static IServiceCollection AddWeb(
         this IServiceCollection services,
@@ -25,6 +27,22 @@ public static class WebExtensions
         services.AddEndpointsApiExplorer();
         services.AddOpenApiDocumentation();
         services.AddHttpContextAccessor();
+        services.AddCors(options =>
+        {
+            var origins = configuration
+                .GetSection("Cors:AllowedOrigins")
+                .Get<string[]>() ?? [];
+
+            options.AddPolicy(FrontendCorsPolicy, policy =>
+            {
+                if (origins.Length > 0)
+                {
+                    policy.WithOrigins(origins)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                }
+            });
+        });
 
         services.AddData(configuration);
         services.AddSigningKeys(configuration);
@@ -52,6 +70,7 @@ public static class WebExtensions
         }
 
         app.UseApiExceptionHandler();
+        app.UseCors(FrontendCorsPolicy);
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapEndpoints();
@@ -59,7 +78,7 @@ public static class WebExtensions
         return app;
     }
 
-    /// <summary>Применяет миграции и засевает начальные данные (роли, admin).</summary>
+    /// <summary>Применяет миграции и засевает начальные роли и пользователей.</summary>
     public static async Task InitializeWebAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
@@ -67,7 +86,7 @@ public static class WebExtensions
 
         await sp.GetRequiredService<IMigrationManager>().MigrateAsync();
         await RoleSeeder.SeedRolesAsync(sp.GetRequiredService<RoleManager<ApplicationRole>>());
-        await AdminSeeder.SeedAdminAsync(
+        await UserSeeder.SeedUsersAsync(
             sp.GetRequiredService<UserManager<ApplicationUser>>(),
             app.Configuration);
     }

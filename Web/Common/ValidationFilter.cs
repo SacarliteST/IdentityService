@@ -22,7 +22,9 @@ internal sealed class ValidationFilter<TRequest>(IServiceProvider sp) : IEndpoin
         var result = await validator.ValidateAsync(argument, context.HttpContext.RequestAborted);
         if (!result.IsValid)
         {
-            return TypedResults.ValidationProblem(result.ToDictionary());
+            return Results.ValidationProblem(
+                result.ToDictionary(),
+                statusCode: StatusCodes.Status422UnprocessableEntity);
         }
 
         return await next(context);

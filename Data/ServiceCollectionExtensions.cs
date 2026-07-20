@@ -14,11 +14,15 @@ public static class ServiceCollectionExtensions
         services.AddOptions<ConnectionOptions>()
             .BindConfiguration(ConnectionOptions.SectionKey);
 
-        var connectionString = configuration.GetConnectionString("ConnectionString")
-            ?? throw new InvalidOperationException("ConnectionStrings:ConnectionString is not configured.");
+        services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+        {
+            var currentConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+            var connectionString = currentConfiguration.GetConnectionString("ConnectionString")
+                ?? throw new InvalidOperationException(
+                    "ConnectionStrings:ConnectionString is not configured.");
 
-        services.AddDbContext<AppDbContext>(opt =>
-            opt.UseNpgsql(connectionString));
+            options.UseNpgsql(connectionString);
+        });
 
         services.AddIdentityCore<ApplicationUser>(opt =>
             {

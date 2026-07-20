@@ -6,6 +6,8 @@ namespace IdentityService.Web.Common;
 
 internal static class OpenApiExtensions
 {
+    private const string BearerScheme = "Bearer";
+
     internal static IServiceCollection AddOpenApiDocumentation(this IServiceCollection services) =>
         services.AddSwaggerGen(c =>
         {
@@ -14,6 +16,19 @@ internal static class OpenApiExtensions
                 Title = "IdentityService API",
                 Version = "v1",
                 Description = "Сервис аутентификации и авторизации платформы Scoodle."
+            });
+
+            c.AddSecurityDefinition(BearerScheme, new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Description = "Введите JWT access token без префикса Bearer."
+            });
+
+            c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference(BearerScheme, document)] = []
             });
 
             c.SupportNonNullableReferenceTypes();
