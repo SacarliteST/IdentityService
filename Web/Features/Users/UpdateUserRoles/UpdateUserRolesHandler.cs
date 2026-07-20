@@ -23,6 +23,7 @@ internal sealed class UpdateUserRolesHandler(
         }
 
         var currentRoles = await userManager.GetRolesAsync(user);
+        var now = timeProvider.GetUtcNow();
         var requestedRoles = command.Roles
             .Select(role => role.ToString())
             .ToHashSet(StringComparer.Ordinal);
@@ -36,7 +37,6 @@ internal sealed class UpdateUserRolesHandler(
 
         if (removesAdmin)
         {
-            var now = timeProvider.GetUtcNow();
             var admins = await userManager.GetUsersInRoleAsync(RoleNames.Admin);
             var activeAdminCount = admins.Count(admin =>
                 !admin.LockoutEnabled || !admin.LockoutEnd.HasValue || admin.LockoutEnd <= now);
@@ -74,12 +74,21 @@ internal sealed class UpdateUserRolesHandler(
             }
         }
 
-        user.UpdatedAt = timeProvider.GetUtcNow();
+        user.UpdatedAt = now;
         var updateResult = await userManager.UpdateAsync(user);
         if (!updateResult.Succeeded)
         {
             return Result.Fail(AuthErrors.FromIdentityErrors(updateResult.Errors));
         }
+
+        db.AuditEvents.Add(AuditEvent.Create(
+            command.ActorUserId,
+            command.TargetUserId,
+            AuditEventTypes.UserRolesUpdated,
+            $"Роли изменены: {String.Join(", ", currentRoles.Order())} -> " +
+            $"{String.Join(", ", requestedRoles.Order())}.",
+            now));
+        await db.SaveChangesAsync(ct);
 
         await transaction.CommitAsync(ct);
         return Result.Success();

@@ -1,5 +1,6 @@
 ﻿using IdentityService.Common.Cqrs;
 using IdentityService.Common.Results;
+using IdentityService.Contracts;
 using IdentityService.Data;
 using IdentityService.Domain;
 using IdentityService.Web.Features.Auth;
@@ -40,6 +41,14 @@ internal sealed class UnblockUserHandler(
         {
             return Result.Fail(AuthErrors.FromIdentityErrors(updateResult.Errors));
         }
+
+        db.AuditEvents.Add(AuditEvent.Create(
+            command.ActorUserId,
+            command.TargetUserId,
+            AuditEventTypes.UserUnblocked,
+            "Пользователь разблокирован.",
+            now));
+        await db.SaveChangesAsync(ct);
 
         await transaction.CommitAsync(ct);
         return Result.Success();

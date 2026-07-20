@@ -21,5 +21,11 @@ public static class ApiRoutes
         public const string Roles = $"{PrefixV1}/users/{{id}}/roles";
         public const string Block = $"{PrefixV1}/users/{{id}}/block";
         public const string Unblock = $"{PrefixV1}/users/{{id}}/unblock";
+        public const string Activity = $"{PrefixV1}/users/{{id}}/activity";
+    }
+
+    public static class Audit
+    {
+        public const string List = $"{PrefixV1}/audit-events";
     }
 }

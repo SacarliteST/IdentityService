@@ -1,4 +1,5 @@
-﻿using IdentityService.Common.Cqrs;
+﻿using System.Security.Claims;
+using IdentityService.Common.Cqrs;
 using IdentityService.Common.Results;
 using IdentityService.Contracts;
 using IdentityService.Web.Common;
@@ -23,11 +24,14 @@ internal sealed class UnblockUserEndpoint : IEndpoint
 
     private static async Task<IResult> Handle(
         Guid id,
+        ClaimsPrincipal principal,
         ISender sender,
         CancellationToken ct)
     {
         var result = await sender.Send<UnblockUserCommand, Result>(
-            new UnblockUserCommand(id),
+            new UnblockUserCommand(
+                Guid.Parse(principal.FindFirstValue(ClaimTypes.NameIdentifier)!),
+                id),
             ct);
 
         return result.ToNoContent();

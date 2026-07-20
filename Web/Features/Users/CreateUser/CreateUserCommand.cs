@@ -5,6 +5,7 @@ using IdentityService.Contracts;
 namespace IdentityService.Web.Features.Users.CreateUser;
 
 internal sealed record CreateUserCommand(
+    Guid ActorUserId,
     string Email,
     string? DisplayName,
     string Password,

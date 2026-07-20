@@ -30,6 +30,14 @@ public sealed class OpenApiContractTests(TestApplication app) : ApiTestBase(app)
             .GetProperty("/api/v1/users/{id}/unblock")
             .TryGetProperty("post", out _)
             .ShouldBeTrue();
+        root.GetProperty("paths")
+            .GetProperty("/api/v1/users/{id}/activity")
+            .TryGetProperty("get", out _)
+            .ShouldBeTrue();
+        root.GetProperty("paths")
+            .GetProperty("/api/v1/audit-events")
+            .TryGetProperty("get", out _)
+            .ShouldBeTrue();
 
         var roleSchema = schemas.GetProperty("UserRole");
         roleSchema.GetProperty("type").GetString().ShouldBe("string");
@@ -50,6 +58,12 @@ public sealed class OpenApiContractTests(TestApplication app) : ApiTestBase(app)
             "roles");
         AssertRequired(schemas.GetProperty("UpdateUserRolesRequest"), "roles");
         AssertRequired(schemas.GetProperty("CreateUserRequest"), "email", "password", "roles");
+        AssertRequired(
+            schemas.GetProperty("AuditEventDto"),
+            "id",
+            "eventType",
+            "description",
+            "createdAt");
         AssertRequired(schemas.GetProperty("ValidationProblemDetails"), "errors");
 
         var loginValidationSchema = root

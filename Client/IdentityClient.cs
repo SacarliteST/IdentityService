@@ -82,4 +82,81 @@ public sealed class IdentityClient(HttpClient httpClient) : IIdentityClient
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
         await httpClient.SendAsync(req, ct);
     }
+
+    public Task<PagedResponse<AuditEventDto>> GetUserActivityAsync(
+        Guid userId,
+        GetUserActivityRequest request,
+        string bearerToken,
+        CancellationToken ct = default)
+    {
+        var path = $"{ApiRoutes.PrefixV1}/users/{userId}/activity";
+        var query = BuildAuditQuery(
+            request.Page,
+            request.PageSize,
+            null,
+            null,
+            request.EventType,
+            request.From,
+            request.To);
+        return SendAuthorizedGetAsync<PagedResponse<AuditEventDto>>(path + query, bearerToken, ct);
+    }
+
+    public Task<PagedResponse<AuditEventDto>> GetAuditEventsAsync(
+        GetAuditEventsRequest request,
+        string bearerToken,
+        CancellationToken ct = default)
+    {
+        var query = BuildAuditQuery(
+            request.Page,
+            request.PageSize,
+            request.ActorUserId,
+            request.TargetUserId,
+            request.EventType,
+            request.From,
+            request.To);
+        return SendAuthorizedGetAsync<PagedResponse<AuditEventDto>>(
+            ApiRoutes.Audit.List + query,
+            bearerToken,
+            ct);
+    }
+
+    private async Task<T> SendAuthorizedGetAsync<T>(
+        string path,
+        string bearerToken,
+        CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, path);
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+        var response = await httpClient.SendAsync(req, ct);
+        return await response.Content.ReadFromJsonAsync<T>(ClientJson.Default, ct)
+            ?? throw new InvalidOperationException($"Empty response from {path}.");
+    }
+
+    private static string BuildAuditQuery(
+        int? page,
+        int? pageSize,
+        Guid? actorUserId,
+        Guid? targetUserId,
+        string? eventType,
+        DateTimeOffset? from,
+        DateTimeOffset? to)
+    {
+        var parameters = new List<string>();
+        Add("page", page?.ToString());
+        Add("pageSize", pageSize?.ToString());
+        Add("actorUserId", actorUserId?.ToString());
+        Add("targetUserId", targetUserId?.ToString());
+        Add("eventType", eventType);
+        Add("from", from?.ToString("O"));
+        Add("to", to?.ToString("O"));
+        return parameters.Count == 0 ? String.Empty : $"?{String.Join("&", parameters)}";
+
+        void Add(string name, string? value)
+        {
+            if (!String.IsNullOrWhiteSpace(value))
+            {
+                parameters.Add($"{name}={Uri.EscapeDataString(value)}");
+            }
+        }
+    }
 }

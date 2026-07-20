@@ -1,4 +1,5 @@
-﻿using IdentityService.Common.Cqrs;
+﻿using System.Security.Claims;
+using IdentityService.Common.Cqrs;
 using IdentityService.Common.Results;
 using IdentityService.Contracts;
 using IdentityService.Web.Common;
@@ -25,11 +26,13 @@ internal sealed class CreateUserEndpoint : IEndpoint
 
     private static async Task<IResult> Handle(
         CreateUserRequest request,
+        ClaimsPrincipal principal,
         ISender sender,
         CancellationToken ct)
     {
         var result = await sender.Send<CreateUserCommand, Result<UserDetailsDto>>(
             new CreateUserCommand(
+                Guid.Parse(principal.FindFirstValue(ClaimTypes.NameIdentifier)!),
                 request.Email,
                 request.DisplayName,
                 request.Password,

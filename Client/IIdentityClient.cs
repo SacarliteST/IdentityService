@@ -45,4 +45,17 @@ public interface IIdentityClient
         Guid userId,
         string bearerToken,
         CancellationToken ct = default);
+
+    /// <summary>Возвращает постраничную активность пользователя.</summary>
+    Task<PagedResponse<AuditEventDto>> GetUserActivityAsync(
+        Guid userId,
+        GetUserActivityRequest request,
+        string bearerToken,
+        CancellationToken ct = default);
+
+    /// <summary>Возвращает постраничный журнал аудита.</summary>
+    Task<PagedResponse<AuditEventDto>> GetAuditEventsAsync(
+        GetAuditEventsRequest request,
+        string bearerToken,
+        CancellationToken ct = default);
 }

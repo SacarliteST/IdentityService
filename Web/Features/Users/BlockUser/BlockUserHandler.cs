@@ -71,6 +71,13 @@ internal sealed class BlockUserHandler(
             token.Revoke(now);
         }
 
+        db.AuditEvents.Add(AuditEvent.Create(
+            command.ActorUserId,
+            command.TargetUserId,
+            AuditEventTypes.UserBlocked,
+            "Пользователь заблокирован.",
+            now));
+
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
         return Result.Success();

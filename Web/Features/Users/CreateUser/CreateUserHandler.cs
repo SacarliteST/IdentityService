@@ -52,6 +52,14 @@ internal sealed class CreateUserHandler(
             }
         }
 
+        db.AuditEvents.Add(AuditEvent.Create(
+            command.ActorUserId,
+            user.Id,
+            AuditEventTypes.UserCreated,
+            $"Создан пользователь с ролями: {String.Join(", ", roles)}.",
+            now));
+        await db.SaveChangesAsync(ct);
+
         await transaction.CommitAsync(ct);
 
         return new UserDetailsDto(
