@@ -10,6 +10,9 @@ public static class ApiRoutes
         public const string Login = $"{PrefixV1}/auth/login";
         public const string Refresh = $"{PrefixV1}/auth/refresh";
         public const string Logout = $"{PrefixV1}/auth/logout";
+
+        /// <summary>Server-to-server: обмен токена на аудиторию другого сервиса (Token Exchange).</summary>
+        public const string TokenExchange = $"{PrefixV1}/auth/token/exchange";
     }
 
     public static class Users

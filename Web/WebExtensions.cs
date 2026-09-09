@@ -90,5 +90,9 @@ public static class WebExtensions
             sp.GetRequiredService<UserManager<ApplicationUser>>(),
             app.Configuration,
             sp.GetRequiredService<TimeProvider>());
+        await ClientSeeder.SeedClientsAsync(
+            sp.GetRequiredService<AppDbContext>(),
+            app.Configuration,
+            sp.GetRequiredService<TimeProvider>());
     }
 }

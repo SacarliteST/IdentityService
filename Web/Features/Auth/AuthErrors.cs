@@ -54,6 +54,24 @@ internal static class AuthErrors
             "Нельзя заблокировать последнего активного администратора.",
             nameof(CannotBlockLastActiveAdmin));
 
+    /// <summary>Client_id неизвестен, клиент отключён или секрет не совпал. 401 Unauthorized.</summary>
+    public static Error InvalidClientCredentials() =>
+        DomainErrors<Client>.Unauthorized(
+            "Неверный client_id или client_secret.",
+            nameof(InvalidClientCredentials));
+
+    /// <summary>Клиенту не разрешено запрашивать указанную audience через Token Exchange. 401 Unauthorized.</summary>
+    public static Error AudienceNotAllowed() =>
+        DomainErrors<Client>.Unauthorized(
+            "Клиенту не разрешено запрашивать эту audience.",
+            nameof(AudienceNotAllowed));
+
+    /// <summary>subjectToken невалиден, истёк, не для этого инстанса, либо его субъект не найден/заблокирован. 401 Unauthorized.</summary>
+    public static Error InvalidSubjectToken() =>
+        DomainErrors<ApplicationUser>.Unauthorized(
+            "Токен для обмена недействителен.",
+            nameof(InvalidSubjectToken));
+
     /// <summary>
     /// Преобразует <see cref="IdentityResult"/> в ошибку:
     /// дубль email → EmailTaken (409); прочее → Validation (422).

@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Security.Cryptography;
+using IdentityService.Common.Crypto;
 using IdentityService.Common.Results;
 using IdentityService.Data;
 using IdentityService.Domain;
@@ -30,33 +31,8 @@ internal sealed class TokenService(
         var now = timeProvider.GetUtcNow();
         var opts = options.Value;
 
-        var claims = new List<Claim>
-        {
-            new("sub", user.Id.ToString()),
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new("email", user.Email!),
-            new("name", user.DisplayName ?? user.Email!),
-            new("jti", Guid.NewGuid().ToString())
-        };
-
-        foreach (var role in roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
-
-        var descriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(claims),
-            Issuer = String.IsNullOrEmpty(opts.Issuer) ? null : opts.Issuer,
-            Audience = String.IsNullOrEmpty(opts.Audience) ? null : opts.Audience,
-            IssuedAt = now.UtcDateTime,
-            NotBefore = now.UtcDateTime,
-            Expires = now.AddMinutes(opts.AccessTokenMinutes).UtcDateTime,
-            SigningCredentials = signingKeyProvider.GetSigningCredentials()
-        };
-
-        var accessToken = TokenHandler.CreateToken(descriptor);
         var accessExpiresAt = now.AddMinutes(opts.AccessTokenMinutes);
+        var accessToken = CreateAccessToken(user, roles, opts.Audience, now, accessExpiresAt);
 
         var rawRefresh = GenerateRawRefreshToken();
         var refreshExpiresAt = now.AddDays(opts.RefreshTokenDays);
@@ -71,6 +47,74 @@ internal sealed class TokenService(
         await db.SaveChangesAsync(ct);
 
         return new TokenPair(accessToken, accessExpiresAt, rawRefresh, refreshExpiresAt);
+    }
+
+    public Task<ExchangedAccessToken> IssueForAudienceAsync(
+        ApplicationUser user,
+        IReadOnlyList<string> roles,
+        string audience,
+        string? sessionId = null,
+        DateTimeOffset? sessionExpiresAt = null,
+        CancellationToken ct = default)
+    {
+        var now = timeProvider.GetUtcNow();
+        var opts = options.Value;
+
+        // TTL: стандартный для обмена, но не дольше времени жизни практической сессии.
+        var expiresAt = now.AddMinutes(opts.ExchangeAccessTokenMinutes);
+        if (sessionExpiresAt is { } sessionExpiry && sessionExpiry < expiresAt)
+        {
+            expiresAt = sessionExpiry;
+        }
+
+        // Token Exchange: короткоживущий токен под конкретный сервис.
+        // Никакого refresh-токена не выпускается и в БД ничего не пишется — не пользовательская
+        // сессия платформы, а разовый пропуск на длительность одного запуска модуля.
+        var token = CreateAccessToken(user, roles, audience, now, expiresAt, sessionId);
+        return Task.FromResult(new ExchangedAccessToken(token, expiresAt));
+    }
+
+    private string CreateAccessToken(
+        ApplicationUser user,
+        IReadOnlyList<string> roles,
+        string audience,
+        DateTimeOffset now,
+        DateTimeOffset expiresAt,
+        string? sessionId = null)
+    {
+        var opts = options.Value;
+
+        var claims = new List<Claim>
+        {
+            new("sub", user.Id.ToString()),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new("email", user.Email!),
+            new("name", user.DisplayName ?? user.Email!),
+            new("jti", Guid.NewGuid().ToString())
+        };
+
+        if (!String.IsNullOrEmpty(sessionId))
+        {
+            claims.Add(new Claim("session_id", sessionId));
+        }
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var descriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Issuer = String.IsNullOrEmpty(opts.Issuer) ? null : opts.Issuer,
+            Audience = String.IsNullOrEmpty(audience) ? null : audience,
+            IssuedAt = now.UtcDateTime,
+            NotBefore = now.UtcDateTime,
+            Expires = expiresAt.UtcDateTime,
+            SigningCredentials = signingKeyProvider.GetSigningCredentials()
+        };
+
+        return TokenHandler.CreateToken(descriptor);
     }
 
     public async Task<Result<TokenPair>> RotateAsync(string rawRefreshToken, CancellationToken ct = default)

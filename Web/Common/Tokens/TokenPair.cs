@@ -6,3 +6,8 @@ internal sealed record TokenPair(
     DateTimeOffset AccessExpiresAt,
     string RefreshToken,
     DateTimeOffset RefreshExpiresAt);
+
+/// <summary>Обменянный (Token Exchange) access-токен с фактическим временем истечения.</summary>
+internal sealed record ExchangedAccessToken(
+    string AccessToken,
+    DateTimeOffset ExpiresAt);

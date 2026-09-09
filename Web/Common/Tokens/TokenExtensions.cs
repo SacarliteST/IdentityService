@@ -6,6 +6,7 @@ internal static class TokenExtensions
     {
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ISubjectTokenValidator, SubjectTokenValidator>();
         return services;
     }
 }

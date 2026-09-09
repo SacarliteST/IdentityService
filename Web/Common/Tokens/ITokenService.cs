@@ -23,6 +23,22 @@ internal interface ITokenService
         CancellationToken ct = default);
 
     /// <summary>
+    /// Выпускает короткоживущий access-токен, ограниченный указанной <paramref name="audience"/>,
+    /// вместо стандартной для этого инстанса. Refresh-токен не выпускается, в БД ничего не
+    /// сохраняется — используется Token Exchange (<c>POST /auth/token/exchange</c>) для выдачи
+    /// доверенным клиентом токена под целевой сервис (например, внешний практический модуль).
+    /// <paramref name="sessionId"/> при наличии попадает в claim <c>session_id</c>;
+    /// <paramref name="sessionExpiresAt"/> при наличии обрезает TTL токена, если раньше стандартного.
+    /// </summary>
+    Task<ExchangedAccessToken> IssueForAudienceAsync(
+        ApplicationUser user,
+        IReadOnlyList<string> roles,
+        string audience,
+        string? sessionId = null,
+        DateTimeOffset? sessionExpiresAt = null,
+        CancellationToken ct = default);
+
+    /// <summary>
     /// Ротирует refresh-токен: отзывает старый, выпускает новую пару.
     /// Возвращает <c>Fail(InvalidRefreshToken 401)</c> если токен не найден, истёк или уже отозван.
     /// При reuse-detection (повтор отозванного токена) отзывает ВСЕ активные сессии пользователя.

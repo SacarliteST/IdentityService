@@ -1,4 +1,5 @@
-﻿using IdentityService.Data.Migrations;
+﻿using IdentityService.Data;
+using IdentityService.Data.Migrations;
 using IdentityService.Data.Seeding;
 using IdentityService.Domain;
 using IdentityService.Host;
@@ -18,6 +19,9 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
     private const string TestPassword = "identity_test_password";
     internal const string TestIssuer = "https://identity.test";
     internal const string TestAudience = "identity.api";
+    internal const string TestExchangeAudience = "sql-module-api.test";
+    internal const string TestClientId = "education-core.test";
+    internal const string TestClientSecret = "test-education-core-secret";
 
     private PostgreSqlContainer? postgres = null;
     private string? connectionString = null;
@@ -38,6 +42,10 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
         var sp = scope.ServiceProvider;
         await sp.GetRequiredService<IMigrationManager>().MigrateAsync();
         await RoleSeeder.SeedRolesAsync(sp.GetRequiredService<RoleManager<ApplicationRole>>());
+        await ClientSeeder.SeedClientsAsync(
+            sp.GetRequiredService<AppDbContext>(),
+            sp.GetRequiredService<IConfiguration>(),
+            sp.GetRequiredService<TimeProvider>());
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -46,7 +54,11 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
         {
             { "Jwt:Issuer", TestIssuer },
             { "Jwt:Audience", TestAudience },
-            { "ConnectionStrings:ConnectionString", connectionString }
+            { "Jwt:ExchangeAccessTokenMinutes", "30" },
+            { "ConnectionStrings:ConnectionString", connectionString },
+            { "InitialClients:0:ClientId", TestClientId },
+            { "InitialClients:0:ClientSecret", TestClientSecret },
+            { "InitialClients:0:AllowedAudiences:0", TestExchangeAudience }
         };
 
         builder.ConfigureAppConfiguration(config =>

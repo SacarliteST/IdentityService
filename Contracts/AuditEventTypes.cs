@@ -7,6 +7,7 @@ public static class AuditEventTypes
     public const string UserRolesUpdated = "UserRolesUpdated";
     public const string UserBlocked = "UserBlocked";
     public const string UserUnblocked = "UserUnblocked";
+    public const string TokenExchanged = "TokenExchanged";
 
     public static readonly IReadOnlyList<string> All =
     [
@@ -14,6 +15,7 @@ public static class AuditEventTypes
         UserCreated,
         UserRolesUpdated,
         UserBlocked,
-        UserUnblocked
+        UserUnblocked,
+        TokenExchanged
     ];
 }
