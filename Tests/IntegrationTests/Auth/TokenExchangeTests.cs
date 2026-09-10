@@ -1,9 +1,13 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Text;
 using IdentityService.Contracts;
+using IdentityService.Domain;
 using IdentityService.IntegrationTests.Infrastructure;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Shouldly;
 
@@ -33,6 +37,29 @@ public sealed class TokenExchangeTests(TestApplication app) : ApiTestBase(app)
         exchanged.Audiences.ShouldContain(TestApplication.TestExchangeAudience);
         exchanged.Audiences.ShouldNotContain(TestApplication.TestAudience);
         exchanged.TryGetClaim("session_id", out _).ShouldBeFalse();
+    }
+
+    [DockerFact]
+    public async Task Exchange_WithoutSessionId_TokenCarriesSubjectRoles()
+    {
+        // TAH-I1: handoff преподавателя в SQL-модуль держится на том, что роль
+        // субъекта переживает обмен, а claim session_id не появляется.
+        var subjectToken = await IssueSubjectTokenAsync(RoleNames.Teacher);
+
+        var response = await SendExchangeRequestAsync(
+            TestApplication.TestClientId, TestApplication.TestClientSecret,
+            subjectToken, TestApplication.TestExchangeAudience);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<TokenExchangeResponse>();
+        var exchanged = JwtReader.ReadJsonWebToken(body!.AccessToken);
+
+        exchanged.Claims
+            .Where(claim => claim.Type == ClaimTypes.Role)
+            .Select(claim => claim.Value)
+            .ShouldContain(RoleNames.Teacher);
+        exchanged.TryGetClaim("session_id", out _).ShouldBeFalse();
+        exchanged.Audiences.ShouldContain(TestApplication.TestExchangeAudience);
     }
 
     [DockerFact]
@@ -134,13 +161,22 @@ public sealed class TokenExchangeTests(TestApplication app) : ApiTestBase(app)
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
-    private async Task<string> IssueSubjectTokenAsync()
+    private async Task<string> IssueSubjectTokenAsync(params string[] roles)
     {
         var email = $"exchange_{Guid.NewGuid()}@test.com";
         const string password = "Password1!";
 
         await HttpClient.PostAsJsonAsync(ApiRoutes.Auth.Register,
             new RegisterRequest(email, password, null));
+
+        if (roles.Length > 0)
+        {
+            var userManager = Scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var user = await userManager.FindByEmailAsync(email)
+                ?? throw new InvalidOperationException($"Зарегистрированный пользователь {email} не найден.");
+            (await userManager.AddToRolesAsync(user, roles)).Succeeded.ShouldBeTrue();
+        }
+
         var loginResponse = await HttpClient.PostAsJsonAsync(ApiRoutes.Auth.Login,
             new LoginRequest(email, password));
 
