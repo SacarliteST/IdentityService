@@ -28,7 +28,7 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
 
     public async Task InitializeAsync()
     {
-        postgres = new PostgreSqlBuilder()
+        postgres = new PostgreSqlBuilder("postgres:15-alpine")
             .WithDatabase(TestDbName)
             .WithUsername(TestUser)
             .WithPassword(TestPassword)
