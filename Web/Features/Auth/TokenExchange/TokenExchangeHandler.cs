@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using IdentityService.Common.Cqrs;
 using IdentityService.Common.Crypto;
 using IdentityService.Common.Results;
@@ -8,6 +8,7 @@ using IdentityService.Domain;
 using IdentityService.Web.Common.Tokens;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TokenHasher = IdentityService.Common.Crypto.TokenHasher;
 
 namespace IdentityService.Web.Features.Auth.TokenExchange;
 
