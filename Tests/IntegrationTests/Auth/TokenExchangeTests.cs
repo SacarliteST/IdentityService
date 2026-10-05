@@ -98,6 +98,67 @@ public sealed class TokenExchangeTests(TestApplication app) : ApiTestBase(app)
     }
 
     [DockerFact]
+    public async Task Exchange_SessionLongerThanDefaultTtl_TokenLivesUntilSessionEnd()
+    {
+        var subjectToken = await IssueSubjectTokenAsync();
+        var sessionExpiresAt = DateTimeOffset.UtcNow.AddHours(2);
+
+        var response = await SendExchangeRequestAsync(
+            TestApplication.TestClientId, TestApplication.TestClientSecret,
+            subjectToken, TestApplication.TestExchangeAudience,
+            Guid.NewGuid().ToString(), sessionExpiresAt);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<TokenExchangeResponse>();
+        // стандартный TTL обмена — 30 мин, но токен практической сессии живёт до её конца
+        body!.ExpiresIn.ShouldBeInRange(2 * 3600 - 60, 2 * 3600);
+    }
+
+    [DockerFact]
+    public async Task Exchange_SessionLongerThanMax_TokenCappedAtSessionTokenMaxHours()
+    {
+        var subjectToken = await IssueSubjectTokenAsync();
+
+        var response = await SendExchangeRequestAsync(
+            TestApplication.TestClientId, TestApplication.TestClientSecret,
+            subjectToken, TestApplication.TestExchangeAudience,
+            Guid.NewGuid().ToString(), DateTimeOffset.UtcNow.AddHours(20));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<TokenExchangeResponse>();
+        body!.ExpiresIn.ShouldBeInRange(8 * 3600 - 60, 8 * 3600);
+    }
+
+    [DockerFact]
+    public async Task Exchange_SessionWithoutTimeLimit_TokenLivesSessionTokenMaxHours()
+    {
+        var subjectToken = await IssueSubjectTokenAsync();
+
+        var response = await SendExchangeRequestAsync(
+            TestApplication.TestClientId, TestApplication.TestClientSecret,
+            subjectToken, TestApplication.TestExchangeAudience,
+            Guid.NewGuid().ToString());
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<TokenExchangeResponse>();
+        body!.ExpiresIn.ShouldBeInRange(8 * 3600 - 60, 8 * 3600);
+    }
+
+    [DockerFact]
+    public async Task Exchange_WithoutSessionId_KeepsDefaultTtl()
+    {
+        var subjectToken = await IssueSubjectTokenAsync();
+
+        var response = await SendExchangeRequestAsync(
+            TestApplication.TestClientId, TestApplication.TestClientSecret,
+            subjectToken, TestApplication.TestExchangeAudience);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<TokenExchangeResponse>();
+        body!.ExpiresIn.ShouldBeInRange(30 * 60 - 60, 30 * 60);
+    }
+
+    [DockerFact]
     public async Task Exchange_WrongClientSecret_Returns401()
     {
         var subjectToken = await IssueSubjectTokenAsync();
