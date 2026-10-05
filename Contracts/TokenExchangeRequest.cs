@@ -14,8 +14,9 @@ namespace IdentityService.Contracts;
 /// по нему привязывает вызовы к платформенной сессии.
 /// </param>
 /// <param name="SessionExpiresAt">
-/// Необязательное время истечения практической сессии. Если раньше стандартного TTL
-/// обменянного токена — <c>exp</c> токена обрезается по нему.
+/// Необязательное время истечения практической сессии. С <paramref name="SessionId"/> токен живёт
+/// до этого момента (но не дольше <c>Jwt:SessionTokenMaxHours</c>); без <paramref name="SessionId"/> —
+/// <c>exp</c> обрезается по нему, если он раньше стандартного TTL обмена.
 /// </param>
 public sealed record TokenExchangeRequest(
     string GrantType,

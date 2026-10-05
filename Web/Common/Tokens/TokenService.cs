@@ -60,8 +60,20 @@ internal sealed class TokenService(
         var now = timeProvider.GetUtcNow();
         var opts = options.Value;
 
-        // TTL: стандартный для обмена, но не дольше времени жизни практической сессии.
-        var expiresAt = now.AddMinutes(opts.ExchangeAccessTokenMinutes);
+        // TTL токена практической сессии (есть session_id) — до конца сессии, но не дольше
+        // SessionTokenMaxHours (для сессии без лимита времени это и есть TTL). Иначе студента
+        // выбросило бы из модуля посреди попытки. Без session_id — стандартный TTL обмена,
+        // обрезанный временем сессии, если оно передано и раньше.
+        DateTimeOffset expiresAt;
+        if (sessionId is not null)
+        {
+            expiresAt = now.AddHours(opts.SessionTokenMaxHours);
+        }
+        else
+        {
+            expiresAt = now.AddMinutes(opts.ExchangeAccessTokenMinutes);
+        }
+
         if (sessionExpiresAt is { } sessionExpiry && sessionExpiry < expiresAt)
         {
             expiresAt = sessionExpiry;

@@ -15,4 +15,12 @@ public sealed class JwtOptions
     /// риск от увеличения TTL ниже, чем у токена, годного против всех сервисов платформы.
     /// </summary>
     public int ExchangeAccessTokenMinutes { get; init; } = 30;
+
+    /// <summary>
+    /// Верхняя граница TTL токена обмена, привязанного к практической сессии (<c>session_id</c>).
+    /// Такой токен живёт до конца сессии (<c>SessionExpiresAt</c>), но не дольше этого значения;
+    /// для сессии без лимита времени TTL равен ему. Токены без <c>session_id</c> по-прежнему
+    /// ограничены <see cref="ExchangeAccessTokenMinutes"/>.
+    /// </summary>
+    public int SessionTokenMaxHours { get; init; } = 8;
 }

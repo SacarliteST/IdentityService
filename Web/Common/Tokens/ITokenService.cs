@@ -28,7 +28,10 @@ internal interface ITokenService
     /// сохраняется — используется Token Exchange (<c>POST /auth/token/exchange</c>) для выдачи
     /// доверенным клиентом токена под целевой сервис (например, внешний практический модуль).
     /// <paramref name="sessionId"/> при наличии попадает в claim <c>session_id</c>;
-    /// <paramref name="sessionExpiresAt"/> при наличии обрезает TTL токена, если раньше стандартного.
+    /// TTL: с <paramref name="sessionId"/> — до <paramref name="sessionExpiresAt"/>, но не дольше
+    /// <c>Jwt:SessionTokenMaxHours</c> (без <paramref name="sessionExpiresAt"/> — ровно столько);
+    /// без <paramref name="sessionId"/> — <c>Jwt:ExchangeAccessTokenMinutes</c>, обрезанный
+    /// <paramref name="sessionExpiresAt"/>, если тот раньше.
     /// </summary>
     Task<ExchangedAccessToken> IssueForAudienceAsync(
         ApplicationUser user,
