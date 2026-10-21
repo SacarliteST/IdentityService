@@ -5,4 +5,7 @@ public sealed record CreateUserRequest(
     string Email,
     string? DisplayName,
     string Password,
-    IReadOnlyList<UserRole> Roles);
+    IReadOnlyList<UserRole> Roles,
+    string? FirstName = null,
+    string? LastName = null,
+    string? MiddleName = null);

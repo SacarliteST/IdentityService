@@ -105,6 +105,11 @@ internal sealed class TokenService(
             new("jti", Guid.NewGuid().ToString())
         };
 
+        // Структурное ФИО для учебных сервисов (стандартные OIDC-claims); пустые не добавляем.
+        AddIfPresent(claims, "given_name", user.FirstName);
+        AddIfPresent(claims, "family_name", user.LastName);
+        AddIfPresent(claims, "middle_name", user.MiddleName);
+
         if (!String.IsNullOrEmpty(sessionId))
         {
             claims.Add(new Claim("session_id", sessionId));
@@ -201,6 +206,14 @@ internal sealed class TokenService(
         await db.SaveChangesAsync(ct);
 
         return Result.Success();
+    }
+
+    private static void AddIfPresent(List<Claim> claims, string type, string? value)
+    {
+        if (!String.IsNullOrWhiteSpace(value))
+        {
+            claims.Add(new Claim(type, value));
+        }
     }
 
     private static string GenerateRawRefreshToken()

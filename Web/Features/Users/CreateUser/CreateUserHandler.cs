@@ -23,8 +23,17 @@ internal sealed class CreateUserHandler(
             Email = command.Email,
             UserName = command.Email,
             DisplayName = command.DisplayName,
+            FirstName = PersonName.Normalize(command.FirstName),
+            LastName = PersonName.Normalize(command.LastName),
+            MiddleName = PersonName.Normalize(command.MiddleName),
             CreatedAt = now
         };
+        // Явно заданное отображаемое имя сохраняем; иначе собираем из имени и фамилии.
+        if (String.IsNullOrWhiteSpace(user.DisplayName))
+        {
+            user.DisplayName = PersonName.BuildDisplayName(user.FirstName, user.LastName);
+        }
+
         var roles = command.Roles
             .Select(role => role.ToString())
             .OrderBy(role => role, StringComparer.Ordinal)
@@ -72,6 +81,9 @@ internal sealed class CreateUserHandler(
             user.UpdatedAt,
             user.LastLoginAt,
             user.BlockedAt,
-            user.BlockReason);
+            user.BlockReason,
+            user.FirstName,
+            user.LastName,
+            user.MiddleName);
     }
 }

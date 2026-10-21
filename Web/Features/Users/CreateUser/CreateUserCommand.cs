@@ -9,4 +9,7 @@ internal sealed record CreateUserCommand(
     string Email,
     string? DisplayName,
     string Password,
-    IReadOnlyList<UserRole> Roles) : IRequest<Result<UserDetailsDto>>;
+    IReadOnlyList<UserRole> Roles,
+    string? FirstName = null,
+    string? LastName = null,
+    string? MiddleName = null) : IRequest<Result<UserDetailsDto>>;
