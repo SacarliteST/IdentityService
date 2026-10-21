@@ -33,6 +33,13 @@ public interface IIdentityClient
         string bearerToken,
         CancellationToken ct = default);
 
+    /// <summary>Меняет ФИО пользователя. Требует Bearer-токен Admin.</summary>
+    Task UpdateUserProfileAsync(
+        Guid userId,
+        UpdateUserProfileRequest request,
+        string bearerToken,
+        CancellationToken ct = default);
+
     /// <summary>Блокирует пользователя и отзывает его refresh-токены.</summary>
     Task BlockUserAsync(
         Guid userId,

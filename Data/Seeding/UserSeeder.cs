@@ -20,6 +20,9 @@ public static class UserSeeder
             var email = section["Email"];
             var password = section["Password"];
             var displayName = section["DisplayName"];
+            var firstName = PersonName.Normalize(section["FirstName"]);
+            var lastName = PersonName.Normalize(section["LastName"]);
+            var middleName = PersonName.Normalize(section["MiddleName"]);
             var role = section["Role"];
 
             if (String.IsNullOrWhiteSpace(email) ||
@@ -37,7 +40,12 @@ public static class UserSeeder
                 {
                     UserName = email,
                     Email = email,
-                    DisplayName = displayName,
+                    DisplayName = String.IsNullOrWhiteSpace(displayName)
+                        ? PersonName.BuildDisplayName(firstName, lastName)
+                        : displayName,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    MiddleName = middleName,
                     EmailConfirmed = true,
                     CreatedAt = timeProvider.GetUtcNow()
                 };

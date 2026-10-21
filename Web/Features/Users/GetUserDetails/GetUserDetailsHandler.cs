@@ -21,6 +21,9 @@ internal sealed class GetUserDetailsHandler(
                 candidate.Id,
                 Email = candidate.Email!,
                 candidate.DisplayName,
+                candidate.FirstName,
+                candidate.LastName,
+                candidate.MiddleName,
                 candidate.CreatedAt,
                 candidate.UpdatedAt,
                 candidate.LastLoginAt,
@@ -57,6 +60,9 @@ internal sealed class GetUserDetailsHandler(
             user.UpdatedAt,
             user.LastLoginAt,
             user.BlockedAt,
-            user.BlockReason);
+            user.BlockReason,
+            user.FirstName,
+            user.LastName,
+            user.MiddleName);
     }
 }

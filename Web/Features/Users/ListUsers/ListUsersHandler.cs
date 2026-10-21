@@ -23,7 +23,9 @@ internal sealed class ListUsersHandler(
             var pattern = $"%{query.Search.Trim()}%";
             users = users.Where(user =>
                 (user.Email != null && EF.Functions.ILike(user.Email, pattern)) ||
-                (user.DisplayName != null && EF.Functions.ILike(user.DisplayName, pattern)));
+                (user.DisplayName != null && EF.Functions.ILike(user.DisplayName, pattern)) ||
+                (user.LastName != null && EF.Functions.ILike(user.LastName, pattern)) ||
+                (user.FirstName != null && EF.Functions.ILike(user.FirstName, pattern)));
         }
 
         if (!String.IsNullOrWhiteSpace(query.Role))
@@ -60,6 +62,9 @@ internal sealed class ListUsersHandler(
                 user.Id,
                 Email = user.Email!,
                 user.DisplayName,
+                user.FirstName,
+                user.LastName,
+                user.MiddleName,
                 user.CreatedAt,
                 user.LastLoginAt,
                 user.LockoutEnabled,
@@ -92,7 +97,10 @@ internal sealed class ListUsersHandler(
                 rolesByUser.GetValueOrDefault(user.Id) ?? [],
                 UserStatusResolver.Resolve(user.LockoutEnabled, user.LockoutEnd, now),
                 user.CreatedAt,
-                user.LastLoginAt))
+                user.LastLoginAt,
+                user.FirstName,
+                user.LastName,
+                user.MiddleName))
             .ToList();
 
         return new PagedResponse<UserListItemDto>(items, query.Page, query.PageSize, totalCount);

@@ -36,7 +36,10 @@ internal sealed class CreateUserEndpoint : IEndpoint
                 request.Email,
                 request.DisplayName,
                 request.Password,
-                request.Roles),
+                request.Roles,
+                request.FirstName,
+                request.LastName,
+                request.MiddleName),
             ct);
 
         return result.ToCreated(user => $"{ApiRoutes.Users.List}/{user.Id}");

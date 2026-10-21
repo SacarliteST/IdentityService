@@ -31,6 +31,10 @@ internal sealed class CreateUserValidator : AbstractValidator<CreateUserRequest>
             .MaximumLength(256)
             .WithMessage("Имя не должно превышать 256 символов.");
 
+        RuleFor(request => request.FirstName).ValidPersonNamePart("Имя");
+        RuleFor(request => request.LastName).ValidPersonNamePart("Фамилия");
+        RuleFor(request => request.MiddleName).ValidPersonNamePart("Отчество");
+
         RuleFor(request => request.Roles)
             .Cascade(CascadeMode.Stop)
             .NotNull()

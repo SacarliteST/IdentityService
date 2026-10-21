@@ -59,6 +59,19 @@ public sealed class IdentityClient(HttpClient httpClient) : IIdentityClient
         await httpClient.SendAsync(req, ct);
     }
 
+    public async Task UpdateUserProfileAsync(
+        Guid userId,
+        UpdateUserProfileRequest request,
+        string bearerToken,
+        CancellationToken ct = default)
+    {
+        var path = $"{ApiRoutes.PrefixV1}/users/{userId}/profile";
+        using var req = new HttpRequestMessage(HttpMethod.Put, path);
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+        req.Content = JsonContent.Create(request, options: ClientJson.Default);
+        await httpClient.SendAsync(req, ct);
+    }
+
     public async Task BlockUserAsync(
         Guid userId,
         BlockUserRequest request,

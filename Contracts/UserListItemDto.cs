@@ -8,4 +8,7 @@ public sealed record UserListItemDto(
     IReadOnlyList<string> Roles,
     string Status,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? LastLoginAt);
+    DateTimeOffset? LastLoginAt,
+    string? FirstName = null,
+    string? LastName = null,
+    string? MiddleName = null);

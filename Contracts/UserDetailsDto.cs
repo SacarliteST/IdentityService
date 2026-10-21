@@ -11,4 +11,7 @@ public sealed record UserDetailsDto(
     DateTimeOffset? UpdatedAt,
     DateTimeOffset? LastLoginAt,
     DateTimeOffset? BlockedAt,
-    string? BlockReason);
+    string? BlockReason,
+    string? FirstName = null,
+    string? LastName = null,
+    string? MiddleName = null);
