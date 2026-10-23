@@ -23,6 +23,7 @@ internal sealed class ListAuditEventsHandler(AppDbContext db)
 
         return await AuditEventQuery.ToPageAsync(
             auditEvents,
+            db.Users.AsNoTracking(),
             query.Page,
             query.PageSize,
             ct);

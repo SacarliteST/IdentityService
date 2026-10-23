@@ -34,6 +34,7 @@ internal sealed class GetUserActivityHandler(AppDbContext db)
 
         return await AuditEventQuery.ToPageAsync(
             auditEvents,
+            db.Users.AsNoTracking(),
             query.Page,
             query.PageSize,
             ct);

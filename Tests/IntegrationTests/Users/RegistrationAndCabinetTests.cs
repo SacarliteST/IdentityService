@@ -285,6 +285,32 @@ public sealed class RegistrationAndCabinetTests : ApiTestBase
         audit.Description.ShouldNotContain("NewPass123");
     }
 
+    [DockerFact]
+    public async Task Audit_ShowsNamesAndEmails_OfActorAndTarget()
+    {
+        var admin = await CreateAdminTokenAsync();
+        var target = await RegisterOpenAsync(NewEmail("audited"), "Короткое Имя");
+        (await SendJsonAsync(
+                HttpMethod.Put,
+                $"{ApiRoutes.PrefixV1}/users/{target.UserId}/profile",
+                new UpdateUserProfileRequest("Анна", "Смирнова", "Игоревна"),
+                admin.AccessToken))
+            .StatusCode.ShouldBe(HttpStatusCode.NoContent);
+
+        var response = await SendAsync(
+            HttpMethod.Get,
+            $"{ApiRoutes.PrefixV1}/audit-events?targetUserId={target.UserId}&eventType={AuditEventTypes.UserProfileUpdated}",
+            admin.AccessToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var page = (await response.Content.ReadFromJsonAsync<PagedResponse<AuditEventDto>>())!;
+        var item = page.Items.Single();
+        item.TargetName.ShouldBe("Смирнова Анна Игоревна");
+        item.TargetEmail.ShouldBe(target.Email);
+        item.ActorName.ShouldBe("Integration Admin");
+        item.ActorEmail.ShouldNotBeNullOrEmpty();
+    }
+
     // ---------- защита от перебора ----------
 
     [DockerFact]
