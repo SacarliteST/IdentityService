@@ -40,7 +40,7 @@ internal sealed class TokenExchangeHandler(
         }
 
         var user = await userManager.FindByIdAsync(userId);
-        if (user is null || await userManager.IsLockedOutAsync(user))
+        if (user is null || await userManager.IsLockedOutAsync(user) || AccountAccess.GetDenial(user) is not null)
         {
             return Result<TokenExchangeResponse>.Fail(AuthErrors.InvalidSubjectToken());
         }

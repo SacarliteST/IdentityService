@@ -44,6 +44,40 @@ internal static class AuthErrors
             "Учётная запись заблокирована.",
             nameof(UserBlocked));
 
+    /// <summary>Заявка на регистрацию ещё не одобрена. 401 Unauthorized.</summary>
+    public static Error AccountPendingApproval() =>
+        DomainErrors<ApplicationUser>.Unauthorized(
+            "Заявка на регистрацию ожидает одобрения администратора.",
+            nameof(AccountPendingApproval));
+
+    /// <summary>Заявка на регистрацию отклонена. 401 Unauthorized.</summary>
+    public static Error AccountRejected() =>
+        DomainErrors<ApplicationUser>.Unauthorized(
+            "Заявка на регистрацию отклонена администратором.",
+            nameof(AccountRejected));
+
+    /// <summary>Регистрация выключена настройкой. 409 Conflict.</summary>
+    public static Error RegistrationClosed() =>
+        DomainErrors<ApplicationUser>.Conflict("Регистрация сейчас закрыта.", nameof(RegistrationClosed));
+
+    /// <summary>Код приглашения неизвестен, выключен, истёк или исчерпан. 422.</summary>
+    public static Error InvalidInviteCode() =>
+        Error.Validation("InviteCode.Invalid", "Код приглашения недействителен, истёк или уже использован.");
+
+    public static Error InviteCodeTaken() =>
+        Error.Conflict("InviteCode.Taken", "Такой код приглашения уже существует.");
+
+    public static Error InviteCodeNotFound(object id) =>
+        Error.NotFound("InviteCode.NotFound", $"Код приглашения '{id}' не найден.");
+
+    public static Error WrongCurrentPassword() =>
+        Error.Validation("ApplicationUser.WrongCurrentPassword", "Текущий пароль указан неверно.");
+
+    public static Error CannotRejectApprovedUser() =>
+        DomainErrors<ApplicationUser>.Conflict(
+            "Нельзя отклонить уже одобренного пользователя — используйте блокировку.",
+            nameof(CannotRejectApprovedUser));
+
     public static Error CannotBlockSelf() =>
         DomainErrors<ApplicationUser>.Conflict(
             "Нельзя заблокировать собственную учётную запись.",

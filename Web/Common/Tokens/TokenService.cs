@@ -180,6 +180,13 @@ internal sealed class TokenService(
             return Result<TokenPair>.Fail(AuthErrors.UserBlocked());
         }
 
+        if (Web.Features.Auth.AccountAccess.GetDenial(user) is { } denial)
+        {
+            token.Revoke(now);
+            await db.SaveChangesAsync(ct);
+            return Result<TokenPair>.Fail(denial);
+        }
+
         var roles = await userManager.GetRolesAsync(user);
         var newPair = await IssueAsync(user, roles.ToList(), ct);
 

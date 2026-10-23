@@ -9,7 +9,7 @@ internal sealed class GetUsersRequestValidator : AbstractValidator<GetUsersReque
         [RoleNames.Admin, RoleNames.Teacher, RoleNames.Student];
 
     private static readonly string[] Statuses =
-        [UserStatuses.Active, UserStatuses.Blocked];
+        [UserStatuses.Active, UserStatuses.Blocked, UserStatuses.Pending, UserStatuses.Rejected];
 
     public GetUsersRequestValidator()
     {
@@ -29,6 +29,6 @@ internal sealed class GetUsersRequestValidator : AbstractValidator<GetUsersReque
             .WithMessage("Роль должна иметь значение Admin, Teacher или Student.");
         RuleFor(request => request.Status)
             .Must(status => status is null || Statuses.Contains(status, StringComparer.OrdinalIgnoreCase))
-            .WithMessage("Статус должен иметь значение Active или Blocked.");
+            .WithMessage("Статус должен иметь значение Active, Blocked, Pending или Rejected.");
     }
 }

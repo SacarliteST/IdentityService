@@ -24,9 +24,26 @@ public static class ApiRoutes
         public const string Roles = $"{PrefixV1}/users/{{id}}/roles";
         public const string Profile = $"{PrefixV1}/users/{{id}}/profile";
         public const string Password = $"{PrefixV1}/users/{{id}}/password";
+        public const string Approve = $"{PrefixV1}/users/{{id}}/approve";
+        public const string Reject = $"{PrefixV1}/users/{{id}}/reject";
         public const string Block = $"{PrefixV1}/users/{{id}}/block";
         public const string Unblock = $"{PrefixV1}/users/{{id}}/unblock";
         public const string Activity = $"{PrefixV1}/users/{{id}}/activity";
+    }
+
+    /// <summary>Личный кабинет текущего пользователя.</summary>
+    public static class Me
+    {
+        public const string Profile = $"{PrefixV1}/me";
+        public const string UpdateProfile = $"{PrefixV1}/me/profile";
+        public const string Password = $"{PrefixV1}/me/password";
+    }
+
+    /// <summary>Коды приглашения (администратор).</summary>
+    public static class InviteCodes
+    {
+        public const string List = $"{PrefixV1}/invite-codes";
+        public const string Deactivate = $"{PrefixV1}/invite-codes/{{id}}/deactivate";
     }
 
     public static class Audit

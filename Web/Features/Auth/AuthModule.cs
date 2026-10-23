@@ -13,7 +13,7 @@ internal static class AuthModule
 {
     internal static IServiceCollection AddAuth(this IServiceCollection services) =>
         services
-            .AddScoped<IRequestHandler<RegisterCommand, Result<TokenResponse>>, RegisterHandler>()
+            .AddScoped<IRequestHandler<RegisterCommand, Result<RegisterResult>>, RegisterHandler>()
             .AddScoped<IRequestHandler<LoginCommand, Result<TokenResponse>>, LoginHandler>()
             .AddScoped<IRequestHandler<RefreshCommand, Result<TokenResponse>>, RefreshHandler>()
             .AddScoped<IRequestHandler<LogoutCommand, Result>, LogoutHandler>()

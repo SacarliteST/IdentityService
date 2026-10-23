@@ -55,6 +55,9 @@ public sealed class TestApplication : WebApplicationFactory<IHostMarker>, IAsync
             { "Jwt:Issuer", TestIssuer },
             { "Jwt:Audience", TestAudience },
             { "Jwt:ExchangeAccessTokenMinutes", "30" },
+            // Прежние тесты регистрируют пользователей и ждут токены сразу; режим одобрения проверяют отдельные тесты.
+            { "Registration:Mode", "Open" },
+            { "RateLimiting:AuthPermitLimit", "100000" },
             { "ConnectionStrings:ConnectionString", connectionString },
             { "InitialClients:0:ClientId", TestClientId },
             { "InitialClients:0:ClientSecret", TestClientSecret },

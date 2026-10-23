@@ -13,8 +13,13 @@ internal sealed class RegisterEndpoint : IEndpoint
             .WithName("Register")
             .WithTags("Аутентификация")
             .WithSummary("Регистрация нового пользователя")
-            .WithDescription("Создаёт пользователя с ролью Student и возвращает пару токенов.")
+            .WithDescription(
+                "Создаёт пользователя с ролью Student. Режим Approval (по умолчанию): без кода приглашения заявка " +
+                "ждёт одобрения администратора (202, токенов нет), с действующим кодом доступ открыт сразу (201 и пара " +
+                "токенов). Режим Open — всегда 201, режим Closed — 409.")
             .Produces<TokenResponse>(StatusCodes.Status201Created)
+            .Produces<RegisterPendingResponse>(StatusCodes.Status202Accepted)
+            .RequireRateLimiting(RateLimitingExtensions.AuthPolicy)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesValidationProblem()
             .AddEndpointFilter<ValidationFilter<RegisterRequest>>()
@@ -24,9 +29,24 @@ internal sealed class RegisterEndpoint : IEndpoint
     private static async Task<IResult> Handle(
         RegisterRequest request, ISender sender, CancellationToken ct)
     {
-        var result = await sender.Send<RegisterCommand, Result<TokenResponse>>(
-            new RegisterCommand(request.Email, request.Password, request.DisplayName), ct);
+        var result = await sender.Send<RegisterCommand, Result<RegisterResult>>(
+            new RegisterCommand(
+                request.Email, request.Password, request.DisplayName,
+                request.FirstName, request.LastName, request.MiddleName, request.InviteCode),
+            ct);
+        if (!result.IsSuccess)
+        {
+            return ResultExtensions.ToProblem(result.Error!);
+        }
 
-        return result.ToCreated(_ => ApiRoutes.Auth.Login);
+        var value = result.Value!;
+        return value.Tokens is not null
+            ? TypedResults.Created(ApiRoutes.Auth.Login, value.Tokens)
+            : Results.Json(
+                new RegisterPendingResponse(
+                    value.Status,
+                    value.Email,
+                    "Заявка принята. Войти можно после одобрения администратором."),
+                statusCode: StatusCodes.Status202Accepted);
     }
 }
