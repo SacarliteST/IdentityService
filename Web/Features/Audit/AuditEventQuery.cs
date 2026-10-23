@@ -42,26 +42,47 @@ internal static class AuditEventQuery
         return query;
     }
 
+    // users — пользователи для подстановки ФИО и email инициатора и объекта события.
     internal static async Task<PagedResponse<AuditEventDto>> ToPageAsync(
         IQueryable<AuditEvent> query,
+        IQueryable<ApplicationUser> users,
         int page,
         int pageSize,
         CancellationToken ct)
     {
         var totalCount = await query.CountAsync(ct);
-        var items = await query
+        var rows = await query
             .OrderByDescending(auditEvent => auditEvent.CreatedAt)
             .ThenByDescending(auditEvent => auditEvent.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(auditEvent => new AuditEventDto(
-                auditEvent.Id,
-                auditEvent.ActorUserId,
-                auditEvent.TargetUserId,
-                auditEvent.EventType,
-                auditEvent.Description,
-                auditEvent.CreatedAt))
+            .Select(auditEvent => new
+            {
+                Event = auditEvent,
+                Actor = users
+                    .Where(user => user.Id == auditEvent.ActorUserId)
+                    .Select(user => new { user.Email, user.LastName, user.FirstName, user.MiddleName, user.DisplayName })
+                    .FirstOrDefault(),
+                Target = users
+                    .Where(user => user.Id == auditEvent.TargetUserId)
+                    .Select(user => new { user.Email, user.LastName, user.FirstName, user.MiddleName, user.DisplayName })
+                    .FirstOrDefault(),
+            })
             .ToListAsync(ct);
+
+        var items = rows
+            .Select(row => new AuditEventDto(
+                row.Event.Id,
+                row.Event.ActorUserId,
+                row.Event.TargetUserId,
+                row.Event.EventType,
+                row.Event.Description,
+                row.Event.CreatedAt,
+                row.Actor is null ? null : PersonName.BuildFullName(row.Actor.LastName, row.Actor.FirstName, row.Actor.MiddleName) ?? row.Actor.DisplayName,
+                row.Actor?.Email,
+                row.Target is null ? null : PersonName.BuildFullName(row.Target.LastName, row.Target.FirstName, row.Target.MiddleName) ?? row.Target.DisplayName,
+                row.Target?.Email))
+            .ToList();
 
         return new PagedResponse<AuditEventDto>(items, page, pageSize, totalCount);
     }
