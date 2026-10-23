@@ -21,6 +21,7 @@ internal sealed class GetUserDetailsHandler(
                 candidate.Id,
                 Email = candidate.Email!,
                 candidate.DisplayName,
+                candidate.ApprovalState,
                 candidate.FirstName,
                 candidate.LastName,
                 candidate.MiddleName,
@@ -55,7 +56,8 @@ internal sealed class GetUserDetailsHandler(
             UserStatusResolver.Resolve(
                 user.LockoutEnabled,
                 user.LockoutEnd,
-                timeProvider.GetUtcNow()),
+                timeProvider.GetUtcNow(),
+                user.ApprovalState),
             user.CreatedAt,
             user.UpdatedAt,
             user.LastLoginAt,

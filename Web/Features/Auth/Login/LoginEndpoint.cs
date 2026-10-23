@@ -18,6 +18,7 @@ internal sealed class LoginEndpoint : IEndpoint
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesValidationProblem()
             .AddEndpointFilter<ValidationFilter<LoginRequest>>()
+            .RequireRateLimiting(Web.Common.RateLimitingExtensions.AuthPolicy)
             .AllowAnonymous();
     }
 

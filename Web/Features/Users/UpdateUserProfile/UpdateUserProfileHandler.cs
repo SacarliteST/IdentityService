@@ -21,6 +21,7 @@ internal sealed class UpdateUserProfileHandler(
             return Result.Fail(AuthErrors.UserNotFound(command.TargetUserId));
         }
 
+        var previous = String.Join(' ', new[] { user.LastName, user.FirstName, user.MiddleName }.Where(part => part is not null));
         var firstName = PersonName.Normalize(command.FirstName);
         var lastName = PersonName.Normalize(command.LastName);
         var middleName = PersonName.Normalize(command.MiddleName);
@@ -52,8 +53,10 @@ internal sealed class UpdateUserProfileHandler(
         db.AuditEvents.Add(AuditEvent.Create(
             command.ActorUserId,
             command.TargetUserId,
-            AuditEventTypes.UserProfileUpdated,
-            $"ФИО изменено: {String.Join(' ', new[] { lastName, firstName, middleName }.Where(part => part is not null))}.",
+            command.BySelf ? AuditEventTypes.UserProfileSelfUpdated : AuditEventTypes.UserProfileUpdated,
+            (command.BySelf ? "Пользователь изменил своё ФИО" : "ФИО изменено администратором") +
+            $": {(previous.Length == 0 ? "—" : previous)} → " +
+            String.Join(' ', new[] { lastName, firstName, middleName }.Where(part => part is not null)) + ".",
             now));
         await db.SaveChangesAsync(ct);
 

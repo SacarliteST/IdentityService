@@ -8,4 +8,5 @@ internal sealed record UpdateUserProfileCommand(
     Guid TargetUserId,
     string? FirstName,
     string? LastName,
-    string? MiddleName) : IRequest<Result>;
+    string? MiddleName,
+    bool BySelf = false) : IRequest<Result>;

@@ -29,6 +29,11 @@ internal sealed class LoginHandler(
             return Result<TokenResponse>.Fail(AuthErrors.UserBlocked());
         }
 
+        if (AccountAccess.GetDenial(user) is { } denial)
+        {
+            return Result<TokenResponse>.Fail(denial);
+        }
+
         var now = timeProvider.GetUtcNow();
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
 

@@ -1,6 +1,7 @@
 ﻿using IdentityService.Common.Cqrs;
 using IdentityService.Common.Results;
 using IdentityService.Contracts;
+using IdentityService.Domain;
 using IdentityService.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -48,7 +49,16 @@ internal sealed class ListUsersHandler(
         else if (String.Equals(query.Status, UserStatuses.Active, StringComparison.OrdinalIgnoreCase))
         {
             users = users.Where(user =>
-                !user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= now);
+                (!user.LockoutEnabled || !user.LockoutEnd.HasValue || user.LockoutEnd.Value <= now)
+                && user.ApprovalState == ApprovalState.Approved);
+        }
+        else if (String.Equals(query.Status, UserStatuses.Pending, StringComparison.OrdinalIgnoreCase))
+        {
+            users = users.Where(user => user.ApprovalState == ApprovalState.Pending);
+        }
+        else if (String.Equals(query.Status, UserStatuses.Rejected, StringComparison.OrdinalIgnoreCase))
+        {
+            users = users.Where(user => user.ApprovalState == ApprovalState.Rejected);
         }
 
         var totalCount = await users.CountAsync(ct);
@@ -68,7 +78,8 @@ internal sealed class ListUsersHandler(
                 user.CreatedAt,
                 user.LastLoginAt,
                 user.LockoutEnabled,
-                user.LockoutEnd
+                user.LockoutEnd,
+                user.ApprovalState
             })
             .ToListAsync(ct);
 
@@ -95,7 +106,7 @@ internal sealed class ListUsersHandler(
                 user.Email,
                 user.DisplayName,
                 rolesByUser.GetValueOrDefault(user.Id) ?? [],
-                UserStatusResolver.Resolve(user.LockoutEnabled, user.LockoutEnd, now),
+                UserStatusResolver.Resolve(user.LockoutEnabled, user.LockoutEnd, now, user.ApprovalState),
                 user.CreatedAt,
                 user.LastLoginAt,
                 user.FirstName,

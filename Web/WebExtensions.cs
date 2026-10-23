@@ -27,6 +27,8 @@ public static class WebExtensions
         services.AddEndpointsApiExplorer();
         services.AddOpenApiDocumentation();
         services.AddHttpContextAccessor();
+        services.Configure<RegistrationOptions>(configuration.GetSection(RegistrationOptions.SectionKey));
+        services.AddAuthRateLimiting(configuration);
         services.AddCors(options =>
         {
             var origins = configuration
@@ -69,10 +71,12 @@ public static class WebExtensions
             app.UseSwaggerUI();
         }
 
+        app.UseForwardedHeaders();
         app.UseApiExceptionHandler();
         app.UseCors(FrontendCorsPolicy);
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseRateLimiter();
         app.MapEndpoints();
 
         return app;
