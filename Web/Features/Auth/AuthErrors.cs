@@ -70,6 +70,20 @@ internal static class AuthErrors
     public static Error InviteCodeNotFound(object id) =>
         Error.NotFound("InviteCode.NotFound", $"Код приглашения '{id}' не найден.");
 
+    /// <summary>Группа с таким названием уже есть. 409 Conflict.</summary>
+    public static Error GroupNameTaken() =>
+        Error.Conflict("Group.NameTaken", "Группа с таким названием уже существует.");
+
+    /// <summary>Группа не найдена. 404 NotFound.</summary>
+    public static Error GroupNotFound(object id) =>
+        Error.NotFound("Group.NotFound", $"Группа '{id}' не найдена.");
+
+    /// <summary>Группу нельзя удалить: в неё зачислены пользователи или она указана в коде приглашения. 409 Conflict.</summary>
+    public static Error GroupInUse() =>
+        Error.Conflict(
+            "Group.InUse",
+            "Группу нельзя удалить: в неё зачислены пользователи или она указана в коде приглашения.");
+
     public static Error WrongCurrentPassword() =>
         Error.Validation("ApplicationUser.WrongCurrentPassword", "Текущий пароль указан неверно.");
 

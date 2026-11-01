@@ -70,7 +70,7 @@ internal sealed class RegisterHandler(
             ApprovalState = approved ? ApprovalState.Approved : ApprovalState.Pending,
             ApprovedAt = approved ? now : null,
             InviteCodeId = invite?.Id,
-            GroupName = invite?.GroupName,
+            GroupId = invite?.GroupId,
         };
 
         var result = await userManager.CreateAsync(user, cmd.Password);

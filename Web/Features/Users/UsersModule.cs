@@ -33,6 +33,10 @@ internal static class UsersModule
             .AddScoped<IRequestHandler<ListInviteCodesQuery, Result<IReadOnlyList<InviteCodeDto>>>, ListInviteCodesHandler>()
             .AddScoped<IRequestHandler<CreateInviteCodeCommand, Result<InviteCodeDto>>, CreateInviteCodeHandler>()
             .AddScoped<IRequestHandler<DeactivateInviteCodeCommand, Result>, DeactivateInviteCodeHandler>()
+            .AddScoped<IRequestHandler<ListGroupsQuery, Result<IReadOnlyList<GroupDto>>>, ListGroupsHandler>()
+            .AddScoped<IRequestHandler<CreateGroupCommand, Result<GroupDto>>, CreateGroupHandler>()
+            .AddScoped<IRequestHandler<RenameGroupCommand, Result<GroupDto>>, RenameGroupHandler>()
+            .AddScoped<IRequestHandler<DeleteGroupCommand, Result>, DeleteGroupHandler>()
             .AddScoped<IRequestHandler<ResetUserPasswordCommand, Result>, ResetUserPasswordHandler>()
             .AddScoped<
                 IRequestHandler<ListUsersQuery, Result<PagedResponse<UserListItemDto>>>,

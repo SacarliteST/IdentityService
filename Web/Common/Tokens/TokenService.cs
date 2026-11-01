@@ -32,7 +32,8 @@ internal sealed class TokenService(
         var opts = options.Value;
 
         var accessExpiresAt = now.AddMinutes(opts.AccessTokenMinutes);
-        var accessToken = CreateAccessToken(user, roles, opts.Audience, now, accessExpiresAt);
+        var groupName = await ResolveGroupNameAsync(user, ct);
+        var accessToken = CreateAccessToken(user, roles, opts.Audience, now, accessExpiresAt, groupName: groupName);
 
         var rawRefresh = GenerateRawRefreshToken();
         var refreshExpiresAt = now.AddDays(opts.RefreshTokenDays);
@@ -49,7 +50,7 @@ internal sealed class TokenService(
         return new TokenPair(accessToken, accessExpiresAt, rawRefresh, refreshExpiresAt);
     }
 
-    public Task<ExchangedAccessToken> IssueForAudienceAsync(
+    public async Task<ExchangedAccessToken> IssueForAudienceAsync(
         ApplicationUser user,
         IReadOnlyList<string> roles,
         string audience,
@@ -82,9 +83,17 @@ internal sealed class TokenService(
         // Token Exchange: короткоживущий токен под конкретный сервис.
         // Никакого refresh-токена не выпускается и в БД ничего не пишется — не пользовательская
         // сессия платформы, а разовый пропуск на длительность одного запуска модуля.
-        var token = CreateAccessToken(user, roles, audience, now, expiresAt, sessionId);
-        return Task.FromResult(new ExchangedAccessToken(token, expiresAt));
+        var groupName = await ResolveGroupNameAsync(user, ct);
+        var token = CreateAccessToken(user, roles, audience, now, expiresAt, sessionId, groupName);
+        return new ExchangedAccessToken(token, expiresAt);
     }
+
+    /// <summary>Название учебной группы пользователя для claim <c>group_name</c>; <see langword="null"/>, если группа не задана.</summary>
+    private async Task<string?> ResolveGroupNameAsync(ApplicationUser user, CancellationToken ct) =>
+        user.GroupId is { } groupId
+            ? await db.Groups.AsNoTracking().Where(group => group.Id == groupId).Select(group => group.Name)
+                .FirstOrDefaultAsync(ct)
+            : null;
 
     private string CreateAccessToken(
         ApplicationUser user,
@@ -92,7 +101,8 @@ internal sealed class TokenService(
         string audience,
         DateTimeOffset now,
         DateTimeOffset expiresAt,
-        string? sessionId = null)
+        string? sessionId = null,
+        string? groupName = null)
     {
         var opts = options.Value;
 
@@ -109,7 +119,7 @@ internal sealed class TokenService(
         AddIfPresent(claims, "given_name", user.FirstName);
         AddIfPresent(claims, "family_name", user.LastName);
         AddIfPresent(claims, "middle_name", user.MiddleName);
-        AddIfPresent(claims, "group_name", user.GroupName);
+        AddIfPresent(claims, "group_name", groupName);
 
         if (!String.IsNullOrEmpty(sessionId))
         {

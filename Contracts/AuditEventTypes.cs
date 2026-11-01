@@ -16,6 +16,9 @@ public static class AuditEventTypes
     public const string UserPasswordChanged = "UserPasswordChanged";
     public const string InviteCodeCreated = "InviteCodeCreated";
     public const string InviteCodeDeactivated = "InviteCodeDeactivated";
+    public const string GroupCreated = "GroupCreated";
+    public const string GroupRenamed = "GroupRenamed";
+    public const string GroupDeleted = "GroupDeleted";
     public const string TokenExchanged = "TokenExchanged";
 
     public static readonly IReadOnlyList<string> All =
@@ -34,6 +37,9 @@ public static class AuditEventTypes
         UserPasswordChanged,
         InviteCodeCreated,
         InviteCodeDeactivated,
+        GroupCreated,
+        GroupRenamed,
+        GroupDeleted,
         TokenExchanged
     ];
 }

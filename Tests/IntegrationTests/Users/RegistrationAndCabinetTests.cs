@@ -192,10 +192,12 @@ public sealed class RegistrationAndCabinetTests : ApiTestBase
     {
         var client = ApprovalClient();
         var admin = await CreateAdminTokenAsync();
+        var group = await CreateGroupAsync(admin.AccessToken, " ИС-21 ");
         var create = await SendJsonAsync(
-            HttpMethod.Post, ApiRoutes.InviteCodes.List, new CreateInviteCodeRequest(null, null, null, null, " ИС-21 "), admin.AccessToken);
+            HttpMethod.Post, ApiRoutes.InviteCodes.List, new CreateInviteCodeRequest(null, null, null, null, group.Id), admin.AccessToken);
         create.StatusCode.ShouldBe(HttpStatusCode.Created);
         var code = (await create.Content.ReadFromJsonAsync<InviteCodeDto>())!;
+        code.GroupId.ShouldBe(group.Id);
         code.GroupName.ShouldBe("ИС-21");
 
         var register = await client.PostAsJsonAsync(
@@ -209,17 +211,76 @@ public sealed class RegistrationAndCabinetTests : ApiTestBase
         payload.GetProperty("group_name").GetString().ShouldBe("ИС-21");
 
         var user = await FindUserAsync(payload.GetProperty("email").GetString()!);
-        user.GroupName.ShouldBe("ИС-21");
+        user.GroupId.ShouldBe(group.Id);
 
         var list = (await (await SendAsync(HttpMethod.Get, ApiRoutes.InviteCodes.List, admin.AccessToken))
             .Content.ReadFromJsonAsync<List<InviteCodeDto>>())!;
-        list.Single(item => item.Id == code.Id).GroupName.ShouldBe("ИС-21");
+        var listed = list.Single(item => item.Id == code.Id);
+        listed.GroupId.ShouldBe(group.Id);
+        listed.GroupName.ShouldBe("ИС-21");
 
         // Без группы claim в токене отсутствует.
         var plain = await RegisterOpenAsync(NewEmail("nogroup"));
         var plainPayload = JsonDocument.Parse(
             System.Text.Encoding.UTF8.GetString(Base64UrlDecode(plain.AccessToken.Split('.')[1]))).RootElement;
         plainPayload.TryGetProperty("group_name", out _).ShouldBeFalse();
+    }
+
+    [DockerFact]
+    public async Task InviteCode_WithUnknownGroup_Is404()
+    {
+        var admin = await CreateAdminTokenAsync();
+
+        var create = await SendJsonAsync(
+            HttpMethod.Post, ApiRoutes.InviteCodes.List, new CreateInviteCodeRequest(null, null, null, null, Guid.NewGuid()), admin.AccessToken);
+
+        create.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [DockerFact]
+    public async Task Groups_Crud_Duplicate409_DeleteGuard()
+    {
+        var admin = await CreateAdminTokenAsync();
+        var student = await RegisterOpenAsync(NewEmail("nogroupadmin"));
+
+        var asStudent = await SendAsync(HttpMethod.Get, ApiRoutes.Groups.List, student.AccessToken);
+        asStudent.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+
+        var group = await CreateGroupAsync(admin.AccessToken, " ИС-22 ");
+        group.Name.ShouldBe("ИС-22");
+        (await SendJsonAsync(HttpMethod.Post, ApiRoutes.Groups.List, new SaveGroupRequest("ИС-22"), admin.AccessToken))
+            .StatusCode.ShouldBe(HttpStatusCode.Conflict);
+
+        var renamed = await SendJsonAsync(
+            HttpMethod.Put, $"{ApiRoutes.PrefixV1}/groups/{group.Id}", new SaveGroupRequest("ИС-23"), admin.AccessToken);
+        renamed.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await renamed.Content.ReadFromJsonAsync<GroupDto>())!.Name.ShouldBe("ИС-23");
+
+        // Группа занята кодом приглашения — удалить нельзя.
+        var code = await SendJsonAsync(
+            HttpMethod.Post, ApiRoutes.InviteCodes.List, new CreateInviteCodeRequest(null, null, null, null, group.Id), admin.AccessToken);
+        code.StatusCode.ShouldBe(HttpStatusCode.Created);
+        (await SendAsync(HttpMethod.Delete, $"{ApiRoutes.PrefixV1}/groups/{group.Id}", admin.AccessToken))
+            .StatusCode.ShouldBe(HttpStatusCode.Conflict);
+
+        // Свободная группа удаляется; повторное удаление — 404.
+        var free = await CreateGroupAsync(admin.AccessToken, "ИС-24");
+        (await SendAsync(HttpMethod.Delete, $"{ApiRoutes.PrefixV1}/groups/{free.Id}", admin.AccessToken))
+            .StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        (await SendAsync(HttpMethod.Delete, $"{ApiRoutes.PrefixV1}/groups/{free.Id}", admin.AccessToken))
+            .StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        var list = (await (await SendAsync(HttpMethod.Get, ApiRoutes.Groups.List, admin.AccessToken))
+            .Content.ReadFromJsonAsync<List<GroupDto>>())!;
+        list.Select(item => item.Name).ShouldContain("ИС-23");
+        list.Select(item => item.Name).ShouldNotContain("ИС-24");
+    }
+
+    private async Task<GroupDto> CreateGroupAsync(string token, string name)
+    {
+        var response = await SendJsonAsync(HttpMethod.Post, ApiRoutes.Groups.List, new SaveGroupRequest(name), token);
+        response.StatusCode.ShouldBe(HttpStatusCode.Created);
+        return (await response.Content.ReadFromJsonAsync<GroupDto>())!;
     }
 
     private static byte[] Base64UrlDecode(string value)

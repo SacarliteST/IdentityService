@@ -14,7 +14,7 @@ namespace IdentityService.Web.Features.Users;
 
 internal sealed record ListInviteCodesQuery : IRequest<Result<IReadOnlyList<InviteCodeDto>>>;
 
-internal sealed record CreateInviteCodeCommand(Guid ActorUserId, string? Code, string? Note, DateTimeOffset? ExpiresAt, int? MaxUses, string? GroupName)
+internal sealed record CreateInviteCodeCommand(Guid ActorUserId, string? Code, string? Note, DateTimeOffset? ExpiresAt, int? MaxUses, Guid? GroupId)
     : IRequest<Result<InviteCodeDto>>;
 
 internal sealed record DeactivateInviteCodeCommand(Guid ActorUserId, Guid Id) : IRequest<Result>;
@@ -22,8 +22,8 @@ internal sealed record DeactivateInviteCodeCommand(Guid ActorUserId, Guid Id) : 
 internal static class InviteCodeMapping
 {
     public static InviteCodeDto ToDto(this InviteCode code) => new(
-        code.Id, code.Code, code.Note, code.GroupName, code.CreatedAt, code.ExpiresAt, code.MaxUses, code.UsedCount, code.IsActive,
-        code.CreatedByUserId);
+        code.Id, code.Code, code.Note, code.GroupId, code.Group?.Name, code.CreatedAt, code.ExpiresAt, code.MaxUses, code.UsedCount,
+        code.IsActive, code.CreatedByUserId);
 }
 
 internal sealed class ListInviteCodesHandler(AppDbContext db)
@@ -31,7 +31,8 @@ internal sealed class ListInviteCodesHandler(AppDbContext db)
 {
     public async Task<Result<IReadOnlyList<InviteCodeDto>>> Handle(ListInviteCodesQuery query, CancellationToken ct)
     {
-        var codes = await db.InviteCodes.AsNoTracking().OrderByDescending(code => code.CreatedAt).ToListAsync(ct);
+        var codes = await db.InviteCodes.AsNoTracking().Include(code => code.Group)
+            .OrderByDescending(code => code.CreatedAt).ToListAsync(ct);
         IReadOnlyList<InviteCodeDto> dtos = codes.Select(code => code.ToDto()).ToList();
         return Result<IReadOnlyList<InviteCodeDto>>.Success(dtos);
     }
@@ -53,9 +54,6 @@ internal sealed class CreateInviteCodeValidator : AbstractValidator<CreateInvite
             .GreaterThanOrEqualTo(1)
             .WithMessage("Лимит использований должен быть не меньше 1.")
             .When(request => request.MaxUses.HasValue);
-        RuleFor(request => request.GroupName)
-            .MaximumLength(InviteCode.GroupNameMaxLength)
-            .WithMessage($"Название группы не должно превышать {InviteCode.GroupNameMaxLength} символов.");
         RuleFor(request => request.ExpiresAt)
             .Must(expires => expires is null || expires > DateTimeOffset.UtcNow)
             .WithMessage("Срок действия должен быть в будущем.");
@@ -77,19 +75,31 @@ internal sealed class CreateInviteCodeHandler(AppDbContext db, TimeProvider time
             return Result<InviteCodeDto>.Fail(AuthErrors.InviteCodeTaken());
         }
 
-        var code = InviteCode.Create(normalized, command.Note, command.GroupName, command.ActorUserId, now, command.ExpiresAt, command.MaxUses);
+        Group? group = null;
+        if (command.GroupId is { } groupId)
+        {
+            group = await db.Groups.FirstOrDefaultAsync(item => item.Id == groupId, ct);
+            if (group is null)
+            {
+                return Result<InviteCodeDto>.Fail(AuthErrors.GroupNotFound(groupId));
+            }
+        }
+
+        var code = InviteCode.Create(normalized, command.Note, group?.Id, command.ActorUserId, now, command.ExpiresAt, command.MaxUses);
         db.InviteCodes.Add(code);
         db.AuditEvents.Add(AuditEvent.Create(
             command.ActorUserId,
             null,
             AuditEventTypes.InviteCodeCreated,
             $"Создан код приглашения {code.Code}" +
-            (code.GroupName is null ? String.Empty : $", группа {code.GroupName}") +
+            (group is null ? String.Empty : $", группа {group.Name}") +
             (code.MaxUses is null ? String.Empty : $", лимит {code.MaxUses}") +
             (code.ExpiresAt is null ? String.Empty : $", до {code.ExpiresAt:dd.MM.yyyy HH:mm} UTC") + ".",
             now));
         await db.SaveChangesAsync(ct);
-        return code.ToDto();
+        return new InviteCodeDto(
+            code.Id, code.Code, code.Note, code.GroupId, group?.Name, code.CreatedAt, code.ExpiresAt, code.MaxUses,
+            code.UsedCount, code.IsActive, code.CreatedByUserId);
     }
 
     private static string Generate()
@@ -155,7 +165,7 @@ internal sealed class InviteCodeEndpoints : IEndpoint
                 var result = await sender.Send<CreateInviteCodeCommand, Result<InviteCodeDto>>(
                     new CreateInviteCodeCommand(
                         Guid.Parse(principal.FindFirstValue(ClaimTypes.NameIdentifier)!),
-                        request.Code, request.Note, request.ExpiresAt, request.MaxUses, request.GroupName),
+                        request.Code, request.Note, request.ExpiresAt, request.MaxUses, request.GroupId),
                     ct);
                 return result.ToCreated(code => ApiRoutes.InviteCodes.List + "/" + code.Id);
             })

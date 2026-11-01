@@ -27,7 +27,9 @@ public sealed class ApplicationUser : IdentityUser<Guid>
     public Guid? InviteCodeId { get; set; }
 
     /// <summary>Учебная группа из кода приглашения (claim <c>group_name</c>); <see langword="null"/> — группа не задана.</summary>
-    public string? GroupName { get; set; }
+    public Guid? GroupId { get; set; }
+
+    public Group? Group { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
 

@@ -46,6 +46,13 @@ public static class ApiRoutes
         public const string Deactivate = $"{PrefixV1}/invite-codes/{{id}}/deactivate";
     }
 
+    /// <summary>Учебные группы (администратор).</summary>
+    public static class Groups
+    {
+        public const string List = $"{PrefixV1}/groups";
+        public const string ById = $"{PrefixV1}/groups/{{id}}";
+    }
+
     public static class Audit
     {
         public const string List = $"{PrefixV1}/audit-events";

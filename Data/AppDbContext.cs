@@ -15,6 +15,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<InviteCode> InviteCodes => Set<InviteCode>();
 
+    public DbSet<Group> Groups => Set<Group>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
