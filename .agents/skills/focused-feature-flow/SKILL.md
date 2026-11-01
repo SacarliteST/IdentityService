@@ -16,7 +16,9 @@ description: Implement or revise an IdentityService feature with bounded analysi
 - While coding: build only the affected project when useful.
 - After the slice is coherent: run the relevant test class/filter.
 - On failure: rerun only the failing test during diagnosis.
-- After the task is fully implemented: run format once, build once, and the complete integration suite exactly once. The full suite is the final acceptance gate, not a check after each edit.
+- After the task is fully implemented: build once and run the complete integration suite exactly once. The full suite is the final acceptance gate, not a check after each edit.
+- After the tests, run `dotnet format IdentityService.sln --no-restore`, then perform one final `dotnet build IdentityService.sln --no-restore`. Do not rerun tests merely because formatting completed, and do not spend time reviewing the formatter-only diff.
+- Then check only `git status` to avoid staging unrelated user work, stage the task-scoped files, and create the task commit without another broad analysis pass.
 
 Use these final commands when the full gate is warranted:
 
@@ -26,4 +28,4 @@ dotnet build IdentityService.sln --no-restore
 dotnet test IdentityService.sln --no-build --no-restore
 ```
 
-Run formatting only at the end and inspect its diff. Do not start the Host, Docker infrastructure, code generation, commits, pushes, dependency installation, or cross-repository work unless required. Stop anything started for verification and report unverified checks plainly.
+Do not start the Host, Docker infrastructure, code generation, pushes, dependency installation, or cross-repository work unless required. Stop anything started for verification and report unverified checks plainly.
