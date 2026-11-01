@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using IdentityService.Web.Common.Keys;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;

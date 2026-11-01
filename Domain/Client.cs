@@ -1,4 +1,4 @@
-namespace IdentityService.Domain;
+﻿namespace IdentityService.Domain;
 
 /// <summary>
 /// Доверенный сервисный клиент, которому разрешён Token Exchange — обмен токена

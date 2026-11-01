@@ -1,4 +1,4 @@
-using IdentityService.Common.Crypto;
+﻿using IdentityService.Common.Crypto;
 using IdentityService.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

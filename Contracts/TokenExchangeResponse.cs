@@ -1,4 +1,4 @@
-namespace IdentityService.Contracts;
+﻿namespace IdentityService.Contracts;
 
 /// <summary>
 /// Ответ на обмен токена. Только access-токен — Token Exchange не выпускает refresh-токен,

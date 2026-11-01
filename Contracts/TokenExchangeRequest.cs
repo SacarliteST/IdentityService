@@ -1,4 +1,4 @@
-namespace IdentityService.Contracts;
+﻿namespace IdentityService.Contracts;
 
 /// <summary>
 /// Запрос на обмен токена пользователя на токен, ограниченный аудиторией другого сервиса

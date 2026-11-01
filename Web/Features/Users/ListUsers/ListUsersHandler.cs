@@ -1,8 +1,8 @@
 ﻿using IdentityService.Common.Cqrs;
 using IdentityService.Common.Results;
 using IdentityService.Contracts;
-using IdentityService.Domain;
 using IdentityService.Data;
+using IdentityService.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace IdentityService.Web.Features.Users.ListUsers;

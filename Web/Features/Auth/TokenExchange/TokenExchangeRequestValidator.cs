@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using IdentityService.Contracts;
 
 namespace IdentityService.Web.Features.Auth.TokenExchange;

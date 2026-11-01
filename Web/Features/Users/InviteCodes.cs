@@ -1,5 +1,5 @@
-﻿using System.Security.Cryptography;
-using System.Security.Claims;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
 using FluentValidation;
 using IdentityService.Common.Cqrs;
 using IdentityService.Common.Results;

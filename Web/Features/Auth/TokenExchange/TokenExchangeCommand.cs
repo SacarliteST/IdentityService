@@ -1,4 +1,4 @@
-using IdentityService.Common.Cqrs;
+﻿using IdentityService.Common.Cqrs;
 using IdentityService.Common.Results;
 using IdentityService.Contracts;
 
