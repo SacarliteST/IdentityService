@@ -99,9 +99,8 @@ namespace IdentityService.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("GroupName")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<Guid?>("GroupId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid?>("InviteCodeId")
                         .HasColumnType("uuid");
@@ -158,6 +157,8 @@ namespace IdentityService.Data.Migrations
                     b.HasIndex("ApprovalState");
 
                     b.HasIndex("CreatedAt");
+
+                    b.HasIndex("GroupId");
 
                     b.HasIndex("LastLoginAt");
 
@@ -245,6 +246,28 @@ namespace IdentityService.Data.Migrations
                     b.ToTable("Clients");
                 });
 
+            modelBuilder.Entity("IdentityService.Domain.Group", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Groups", (string)null);
+                });
+
             modelBuilder.Entity("IdentityService.Domain.InviteCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -265,9 +288,8 @@ namespace IdentityService.Data.Migrations
                     b.Property<DateTimeOffset?>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("GroupName")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<Guid?>("GroupId")
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -286,6 +308,8 @@ namespace IdentityService.Data.Migrations
 
                     b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("GroupId");
 
                     b.ToTable("InviteCodes", (string)null);
                 });
@@ -429,6 +453,26 @@ namespace IdentityService.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("IdentityService.Domain.ApplicationUser", b =>
+                {
+                    b.HasOne("IdentityService.Domain.Group", "Group")
+                        .WithMany("Users")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("IdentityService.Domain.InviteCode", b =>
+                {
+                    b.HasOne("IdentityService.Domain.Group", "Group")
+                        .WithMany("InviteCodes")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Group");
+                });
+
             modelBuilder.Entity("IdentityService.Domain.RefreshToken", b =>
                 {
                     b.HasOne("IdentityService.Domain.ApplicationUser", null)
@@ -487,6 +531,13 @@ namespace IdentityService.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("IdentityService.Domain.Group", b =>
+                {
+                    b.Navigation("InviteCodes");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }
