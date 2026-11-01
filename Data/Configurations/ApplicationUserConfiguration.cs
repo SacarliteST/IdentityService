@@ -19,6 +19,7 @@ internal sealed class ApplicationUserConfiguration : IEntityTypeConfiguration<Ap
         builder.Property(user => user.FirstName).HasMaxLength(PersonName.MaxPartLength);
         builder.Property(user => user.LastName).HasMaxLength(PersonName.MaxPartLength);
         builder.Property(user => user.MiddleName).HasMaxLength(PersonName.MaxPartLength);
+        builder.Property(user => user.GroupName).HasMaxLength(InviteCode.GroupNameMaxLength);
 
         builder.HasIndex(user => user.CreatedAt);
         builder.HasIndex(user => user.LastLoginAt);

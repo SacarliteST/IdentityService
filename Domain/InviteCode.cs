@@ -12,6 +12,9 @@ public sealed class InviteCode
 
     public string? Note { get; private set; }
 
+    /// <summary>Учебная группа, в которую попадёт зарегистрированный по коду пользователь.</summary>
+    public string? GroupName { get; private set; }
+
     public Guid CreatedByUserId { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private set; }
@@ -29,11 +32,22 @@ public sealed class InviteCode
     {
     }
 
+    /// <summary>Максимальная длина названия группы (как в учебном профиле Education).</summary>
+    public const int GroupNameMaxLength = 50;
+
     public static string Normalize(string code) => code.Trim().ToUpperInvariant();
+
+    /// <summary>Приводит название группы к каноническому виду: без пробелов по краям, пустое — <see langword="null"/>.</summary>
+    public static string? NormalizeGroupName(string? groupName)
+    {
+        var trimmed = groupName?.Trim();
+        return String.IsNullOrEmpty(trimmed) ? null : trimmed;
+    }
 
     public static InviteCode Create(
         string code,
         string? note,
+        string? groupName,
         Guid createdByUserId,
         DateTimeOffset createdAt,
         DateTimeOffset? expiresAt,
@@ -43,6 +57,7 @@ public sealed class InviteCode
             Id = Guid.NewGuid(),
             Code = Normalize(code),
             Note = PersonName.Normalize(note),
+            GroupName = NormalizeGroupName(groupName),
             CreatedByUserId = createdByUserId,
             CreatedAt = createdAt,
             ExpiresAt = expiresAt,

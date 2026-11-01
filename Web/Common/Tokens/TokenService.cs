@@ -109,6 +109,7 @@ internal sealed class TokenService(
         AddIfPresent(claims, "given_name", user.FirstName);
         AddIfPresent(claims, "family_name", user.LastName);
         AddIfPresent(claims, "middle_name", user.MiddleName);
+        AddIfPresent(claims, "group_name", user.GroupName);
 
         if (!String.IsNullOrEmpty(sessionId))
         {

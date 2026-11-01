@@ -14,7 +14,7 @@ namespace IdentityService.Web.Features.Users;
 
 internal sealed record ListInviteCodesQuery : IRequest<Result<IReadOnlyList<InviteCodeDto>>>;
 
-internal sealed record CreateInviteCodeCommand(Guid ActorUserId, string? Code, string? Note, DateTimeOffset? ExpiresAt, int? MaxUses)
+internal sealed record CreateInviteCodeCommand(Guid ActorUserId, string? Code, string? Note, DateTimeOffset? ExpiresAt, int? MaxUses, string? GroupName)
     : IRequest<Result<InviteCodeDto>>;
 
 internal sealed record DeactivateInviteCodeCommand(Guid ActorUserId, Guid Id) : IRequest<Result>;
@@ -22,7 +22,7 @@ internal sealed record DeactivateInviteCodeCommand(Guid ActorUserId, Guid Id) : 
 internal static class InviteCodeMapping
 {
     public static InviteCodeDto ToDto(this InviteCode code) => new(
-        code.Id, code.Code, code.Note, code.CreatedAt, code.ExpiresAt, code.MaxUses, code.UsedCount, code.IsActive,
+        code.Id, code.Code, code.Note, code.GroupName, code.CreatedAt, code.ExpiresAt, code.MaxUses, code.UsedCount, code.IsActive,
         code.CreatedByUserId);
 }
 
@@ -53,6 +53,9 @@ internal sealed class CreateInviteCodeValidator : AbstractValidator<CreateInvite
             .GreaterThanOrEqualTo(1)
             .WithMessage("Лимит использований должен быть не меньше 1.")
             .When(request => request.MaxUses.HasValue);
+        RuleFor(request => request.GroupName)
+            .MaximumLength(InviteCode.GroupNameMaxLength)
+            .WithMessage($"Название группы не должно превышать {InviteCode.GroupNameMaxLength} символов.");
         RuleFor(request => request.ExpiresAt)
             .Must(expires => expires is null || expires > DateTimeOffset.UtcNow)
             .WithMessage("Срок действия должен быть в будущем.");
@@ -74,13 +77,14 @@ internal sealed class CreateInviteCodeHandler(AppDbContext db, TimeProvider time
             return Result<InviteCodeDto>.Fail(AuthErrors.InviteCodeTaken());
         }
 
-        var code = InviteCode.Create(normalized, command.Note, command.ActorUserId, now, command.ExpiresAt, command.MaxUses);
+        var code = InviteCode.Create(normalized, command.Note, command.GroupName, command.ActorUserId, now, command.ExpiresAt, command.MaxUses);
         db.InviteCodes.Add(code);
         db.AuditEvents.Add(AuditEvent.Create(
             command.ActorUserId,
             null,
             AuditEventTypes.InviteCodeCreated,
             $"Создан код приглашения {code.Code}" +
+            (code.GroupName is null ? String.Empty : $", группа {code.GroupName}") +
             (code.MaxUses is null ? String.Empty : $", лимит {code.MaxUses}") +
             (code.ExpiresAt is null ? String.Empty : $", до {code.ExpiresAt:dd.MM.yyyy HH:mm} UTC") + ".",
             now));
@@ -151,7 +155,7 @@ internal sealed class InviteCodeEndpoints : IEndpoint
                 var result = await sender.Send<CreateInviteCodeCommand, Result<InviteCodeDto>>(
                     new CreateInviteCodeCommand(
                         Guid.Parse(principal.FindFirstValue(ClaimTypes.NameIdentifier)!),
-                        request.Code, request.Note, request.ExpiresAt, request.MaxUses),
+                        request.Code, request.Note, request.ExpiresAt, request.MaxUses, request.GroupName),
                     ct);
                 return result.ToCreated(code => ApiRoutes.InviteCodes.List + "/" + code.Id);
             })

@@ -188,6 +188,48 @@ public sealed class RegistrationAndCabinetTests : ApiTestBase
     }
 
     [DockerFact]
+    public async Task InviteCode_WithGroup_AssignsGroup_AndTokenCarriesGroupClaim()
+    {
+        var client = ApprovalClient();
+        var admin = await CreateAdminTokenAsync();
+        var create = await SendJsonAsync(
+            HttpMethod.Post, ApiRoutes.InviteCodes.List, new CreateInviteCodeRequest(null, null, null, null, " ИС-21 "), admin.AccessToken);
+        create.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var code = (await create.Content.ReadFromJsonAsync<InviteCodeDto>())!;
+        code.GroupName.ShouldBe("ИС-21");
+
+        var register = await client.PostAsJsonAsync(
+            ApiRoutes.Auth.Register,
+            new RegisterRequest(NewEmail("grouped"), "Password1", "С группой", InviteCode: code.Code));
+
+        register.StatusCode.ShouldBe(HttpStatusCode.Created);
+        var tokens = (await register.Content.ReadFromJsonAsync<TokenResponse>())!;
+        var payload = JsonDocument.Parse(
+            System.Text.Encoding.UTF8.GetString(Base64UrlDecode(tokens.AccessToken.Split('.')[1]))).RootElement;
+        payload.GetProperty("group_name").GetString().ShouldBe("ИС-21");
+
+        var user = await FindUserAsync(payload.GetProperty("email").GetString()!);
+        user.GroupName.ShouldBe("ИС-21");
+
+        var list = (await (await SendAsync(HttpMethod.Get, ApiRoutes.InviteCodes.List, admin.AccessToken))
+            .Content.ReadFromJsonAsync<List<InviteCodeDto>>())!;
+        list.Single(item => item.Id == code.Id).GroupName.ShouldBe("ИС-21");
+
+        // Без группы claim в токене отсутствует.
+        var plain = await RegisterOpenAsync(NewEmail("nogroup"));
+        var plainPayload = JsonDocument.Parse(
+            System.Text.Encoding.UTF8.GetString(Base64UrlDecode(plain.AccessToken.Split('.')[1]))).RootElement;
+        plainPayload.TryGetProperty("group_name", out _).ShouldBeFalse();
+    }
+
+    private static byte[] Base64UrlDecode(string value)
+    {
+        var padded = value.Replace('-', '+').Replace('_', '/');
+        padded = padded.PadRight(padded.Length + (4 - padded.Length % 4) % 4, '=');
+        return Convert.FromBase64String(padded);
+    }
+
+    [DockerFact]
     public async Task InviteCode_Unknown_IsRejected_NoUserCreated()
     {
         var email = NewEmail("nocode");

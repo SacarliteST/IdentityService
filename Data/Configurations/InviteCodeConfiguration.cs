@@ -12,6 +12,7 @@ internal sealed class InviteCodeConfiguration : IEntityTypeConfiguration<InviteC
         builder.HasKey(code => code.Id);
         builder.Property(code => code.Code).IsRequired().HasMaxLength(64);
         builder.Property(code => code.Note).HasMaxLength(500);
+        builder.Property(code => code.GroupName).HasMaxLength(InviteCode.GroupNameMaxLength);
         builder.HasIndex(code => code.Code).IsUnique();
     }
 }
